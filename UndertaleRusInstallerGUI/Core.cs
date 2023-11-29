@@ -50,7 +50,7 @@ public static class Core
     private static readonly string currDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
     public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
     private static readonly string zipName = "ru_data.zip";
-	private static string gameDirLocation;
+    private static string gameDirLocation;
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
                                                             : new[] { ".win", ".ios", ".unx" };
@@ -108,53 +108,53 @@ public static class Core
     public static string GetDefaultUTFilePath()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-		{
-			foreach (var drive in DriveInfo.GetDrives().Select(d => d.Name))
-			{
-				string dirPath = String.Format(utWinLocation, drive, " (x86)");
-				string path = dirPath + utWinFileLoc;
-				if (File.Exists(path))
-				{
-					gameDirLocation = dirPath;
-					return path;
-				}
+        {
+            foreach (var drive in DriveInfo.GetDrives().Select(d => d.Name))
+            {
+                string dirPath = String.Format(utWinLocation, drive, " (x86)");
+                string path = dirPath + utWinFileLoc;
+                if (File.Exists(path))
+                {
+                    gameDirLocation = dirPath;
+                    return path;
+                }
 
-				dirPath = String.Format(utWinLocation, drive, "");
-				path = dirPath + utWinFileLoc;
-				if (File.Exists(path))
-				{
-					gameDirLocation = dirPath;
-					return path;
-				}
-			}
-		}
-		else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-		{
-			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-			string dirPath = String.Format(utMacLocation, userDir);
-			string path = dirPath + utMacFileLoc;
-			if (File.Exists(path))
-			{
-				gameDirLocation = dirPath;
-				return path;
-			}
-		}
-		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-		{
-			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-			foreach (string pathFormat in utLinuxLocations)
-			{
-				string dirPath = String.Format(pathFormat, userDir);
-				string path = dirPath + utLinuxFileLoc;
-				if (File.Exists(path))
-				{
-					gameDirLocation = dirPath;
-					return path;
-				}
-			}
-		}
+                dirPath = String.Format(utWinLocation, drive, "");
+                path = dirPath + utWinFileLoc;
+                if (File.Exists(path))
+                {
+                    gameDirLocation = dirPath;
+                    return path;
+                }
+            }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string dirPath = String.Format(utMacLocation, userDir);
+            string path = dirPath + utMacFileLoc;
+            if (File.Exists(path))
+            {
+                gameDirLocation = dirPath;
+                return path;
+            }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            foreach (string pathFormat in utLinuxLocations)
+            {
+                string dirPath = String.Format(pathFormat, userDir);
+                string path = dirPath + utLinuxFileLoc;
+                if (File.Exists(path))
+                {
+                    gameDirLocation = dirPath;
+                    return path;
+                }
+            }
+        }
 
-		return null;
+        return null;
     }
 
     public static async Task<bool> LoadDataFile(WarningHandlerDelegate warnDelegate, MessageHandlerDelegate msgDelegate)
@@ -396,7 +396,7 @@ public static class Core
                         texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
                         texturePageItem.TexturePage = texture;
                         Data.TexturePageItems.Add(texturePageItem);
-                        
+
 
                         UndertaleFont font = null;
                         font = Data.Fonts.ByName(stripped);
