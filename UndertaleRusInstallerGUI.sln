@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleRusInstallerGUI", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleRusInstallerGUI.Desktop", "UndertaleRusInstallerGUI.Desktop\UndertaleRusInstallerGUI.Desktop.csproj", "{43E1AE83-B38A-409F-A1B9-033CDBBBA807}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{B02BEB60-BAF0-4B3C-BB79-BB8A110CE17C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLib", "UndertaleModTool\UndertaleModLib\UndertaleModLib.csproj", "{B02BEB60-BAF0-4B3C-BB79-BB8A110CE17C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
