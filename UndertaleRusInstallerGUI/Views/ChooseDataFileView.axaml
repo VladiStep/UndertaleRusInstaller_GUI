@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.ChooseDataFileView"
+			 Background="{StaticResource WinLightGrayBrush}"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree"
+			 DetachedFromVisualTree="UserControl_DetachedFromVisualTree">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Background="White">
+			<Image Width="150" Height="60" Source="/Assets/choose_data_file.png"/>
+			<StackPanel Margin="9,7,0,0">
+				<TextBlock Classes="littleHeader">Выбор файла</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Укажите расположение файла данных игры.</TextBlock>
+			</StackPanel>
+		</StackPanel>
+		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
+
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
+			<TextBlock Classes="normal" Name="CheckResultText" Margin="0,0,0,13"
+					   IsVisible="False"/>
+			<HeaderedContentControl Name="DataPathHeader">
+				<StackPanel Orientation="Horizontal">
+					<TextBox Name="DataPathBox" TextChanging="DataPathBox_TextChanging"/>
+					<Button Classes="button" Click="BrowseButton_Click">Обзор...</Button>
+				</StackPanel>
+			</HeaderedContentControl>
+		</StackPanel>
+	</Grid>
+</UserControl>

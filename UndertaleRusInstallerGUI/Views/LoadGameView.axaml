@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.LoadGameView"
+			 Background="{StaticResource WinLightGrayBrush}"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Background="White">
+			<Image Width="150" Height="60" Source="/Assets/load_game.png"/>
+			<StackPanel Margin="9,7,0,0">
+				<TextBlock Classes="littleHeader">Загрузка игры</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Загрузка и проверка данных игры.</TextBlock>
+			</StackPanel>
+		</StackPanel>
+		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
+
+		<Border Grid.Row="2" Grid.ColumnSpan="2" Classes="loadingLogBorder">
+			<ScrollViewer Name="LoadingLogScroll" BringIntoViewOnFocusChange="False"
+						  PointerPressed="ScrollViewer_PointerPressed" PointerReleased="ScrollViewer_PointerReleased">
+				<SelectableTextBlock Classes="normal log" Name="LoadingLogText"/>
+			</ScrollViewer>
+		</Border>
+	</Grid>
+</UserControl>

@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.FinishView"
+			 Background="White"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<Image Grid.Column="0" Source="/Assets/finish.png" Stretch="None" VerticalAlignment="Top"/>
+		<StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal">
+			<Rectangle Fill="#FFBB47A8" Width="45"/>
+			<Rectangle Fill="#FFD262BD" Width="70"/>
+			<Rectangle Fill="#FFBB47A8" Width="45"/>
+		</StackPanel>
+		<StackPanel Grid.Column="1" Margin="16">
+			<TextBlock Classes="header" Name="HeaderSuccessText">
+				Установка русификатора _ успешно завершена
+			</TextBlock>
+			<TextBlock Classes="normal">
+				<Run Name="SuccessRun">Установка русификатора _ выполнена.</Run><LineBreak/>
+				<LineBreak/>
+				Нажмите "Готово" для выхода из установщика.<LineBreak/>
+			</TextBlock>
+		</StackPanel>
+	</Grid>
+</UserControl>

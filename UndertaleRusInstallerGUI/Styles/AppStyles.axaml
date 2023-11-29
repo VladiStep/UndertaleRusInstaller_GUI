@@ -1,0 +1,262 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+	
+	<Styles.Resources>
+		<SolidColorBrush x:Key="WinGrayBrush" Color="#FFABABAB"/>
+		<SolidColorBrush x:Key="WinLightGrayBrush" Color="#FFF0F0F0"/>
+	</Styles.Resources>
+
+	<Style Selector="Rectangle#SeparatorRect">
+		<Setter Property="Fill" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="Height" Value="1"/>
+	</Style>
+	
+	<Style Selector="TextBlock.header">
+		<Setter Property="TextWrapping" Value="Wrap"/>
+		<Setter Property="FontSize" Value="16"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Margin" Value="0,0,0,24"/>
+	</Style>
+	<Style Selector="TextBlock.normal">
+		<Setter Property="TextWrapping" Value="Wrap"/>
+		<Setter Property="FontSize" Value="12"/>
+	</Style>
+	<Style Selector="SelectableTextBlock.normal">
+		<Setter Property="TextWrapping" Value="Wrap"/>
+		<Setter Property="FontSize" Value="12"/>
+	</Style>
+	<Style Selector="TextBlock.littleHeader">
+		<Setter Property="TextWrapping" Value="Wrap"/>
+		<Setter Property="FontSize" Value="12"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+	</Style>
+	<Style Selector="TextBlock.littleSubHeader">
+		<Setter Property="Margin" Value="7,4,0,0"/>
+	</Style>
+	<Style Selector="TextBlock#CopyrightText">
+		<Setter Property="Text" Value="Русификатор UT/NXTale, 2023"/>
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="Foreground" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="Padding" Value="11,0,5,0"/>
+	</Style>
+
+	<Style Selector="Button.button">
+		<Setter Property="Width" Value="72"/>
+		<Setter Property="Height" Value="21"/>
+		<Setter Property="Margin" Value="1,0,1,0"/>
+		<Setter Property="Padding" Value="13,3,0,0"/>
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="Background" Value="#FFE1E1E1"/>
+		<Setter Property="BorderBrush" Value="#FFADADAD"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+
+		<Style Selector="^:pointerover /template/ ContentPresenter">
+			<Setter Property="Width" Value="72"/>
+			<Setter Property="Height" Value="21"/>
+			<Setter Property="Background" Value="#FFE5F1FB"/>
+			<Setter Property="BorderBrush" Value="#FF0078D7"/>
+		</Style>
+		<Style Selector="^:disabled /template/ ContentPresenter">
+			<Setter Property="Width" Value="72"/>
+			<Setter Property="Height" Value="21"/>
+			<Setter Property="Background" Value="#FFCCCCCC"/>
+			<Setter Property="BorderBrush" Value="#FFBFBFBF"/>
+		</Style>
+	</Style>
+	<Style Selector="Button.blueButton">
+		<Setter Property="Width" Value="72"/>
+		<Setter Property="Height" Value="21"/>
+		<Setter Property="Margin" Value="1,0,1,0"/>
+		<Setter Property="Padding" Value="12,2,0,0"/>
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="Background" Value="#FFE1E1E1"/>
+		<Setter Property="BorderBrush" Value="#FF0078D7"/>
+		<Setter Property="BorderThickness" Value="2"/>
+		<Setter Property="CornerRadius" Value="0"/>
+
+		<Style Selector="^:pointerover /template/ ContentPresenter">
+			<Setter Property="Width" Value="72"/>
+			<Setter Property="Height" Value="21"/>
+			<Setter Property="Padding" Value="13,3,0,0"/>
+			<Setter Property="Background" Value="#FFE5F1FB"/>
+			<Setter Property="BorderBrush" Value="#FF0078D7"/>
+			<Setter Property="BorderThickness" Value="1"/>
+		</Style>
+		<Style Selector="^:disabled /template/ ContentPresenter">
+			<Setter Property="Width" Value="72"/>
+			<Setter Property="Height" Value="21"/>
+			<Setter Property="Padding" Value="13,3,0,0"/>
+			<Setter Property="Background" Value="#FFCCCCCC"/>
+			<Setter Property="BorderBrush" Value="#FFBFBFBF"/>
+			<Setter Property="BorderThickness" Value="1"/>
+		</Style>
+	</Style>
+	<Style Selector="Button.finish /template/ ContentPresenter">
+		<Setter Property="Content" Value="Готово"/>
+		<Setter Property="Padding" Value="14,2,0,0"/>
+
+		<Style Selector="^:pointerover">
+			<Setter Property="Padding" Value="15,3,0,0"/>
+		</Style>
+		<!-- No need for "^:disabled" because it won't be disabled -->
+	</Style>
+	<Style Selector="Button.install /template/ ContentPresenter">
+		<Setter Property="Content" Value="Установить"/>
+		<Setter Property="Padding" Value="4,2,0,0"/>
+
+		<Style Selector="^:pointerover">
+			<Setter Property="Padding" Value="5,3,0,0"/>
+		</Style>
+		<!-- No need for "^:disabled" because it won't be disabled -->
+	</Style>
+	
+	
+	<Style Selector="RadioButton">
+		<Setter Property="FontSize" Value="12"/>
+	</Style>
+	<Style Selector="Run.footnote">
+		<Setter Property="Foreground" Value="Gray"/>
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="FontStyle" Value="Italic"/>
+	</Style>
+	
+
+	<Style Selector="Button.link">
+		<Setter Property="FontSize" Value="12"/>
+		<Setter Property="Foreground" Value="Blue"/>
+		<Setter Property="Padding" Value="0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<ContentPresenter Content="{TemplateBinding Content}">
+					<ContentPresenter.Styles>
+						<Style Selector="TextBlock">
+							<Setter Property="Foreground" Value="{TemplateBinding Foreground}"/>
+							<Setter Property="FontSize" Value="{TemplateBinding FontSize}"/>
+							<Setter Property="TextDecorations" Value="Underline"/>
+						</Style>
+					</ContentPresenter.Styles>
+				</ContentPresenter>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+
+	
+	<Style Selector="HeaderedContentControl">
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="Background" Value="{StaticResource WinLightGrayBrush}"/>
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Panel HorizontalAlignment="Left">
+					<TextBlock ZIndex="1" Text="{TemplateBinding Header}" Margin="9,0,0,0" Padding="3,0,3,0" Background="{TemplateBinding Background}"
+								HorizontalAlignment="Left" VerticalAlignment="Top"/>
+					<Border Padding="15" Margin="0,7,0,0"
+							BorderBrush="#FFDCDCDC" BorderThickness="1" CornerRadius="0">
+						<ContentPresenter Content="{TemplateBinding Content}"/>
+					</Border>
+				</Panel>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+	<Style Selector="TextBox#DataPathBox">
+		<Setter Property="Width" Value="330"/>
+		<Setter Property="MinHeight" Value="21"/>
+		<Setter Property="FontSize" Value="11"/>
+		<Setter Property="Margin" Value="0,0,16,0"/>
+		<Setter Property="Padding" Value="5,3,5,2"/>
+		<Setter Property="BorderBrush" Value="#FF7A7A7A"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Background" Value="White"/>
+		<Setter Property="Watermark" Value="Введите путь файла или нажмите &quot;Обзор...&quot;"/>
+		
+		<Style Selector="^:pointerover /template/ Border">
+			<Setter Property="Background" Value="White"/>
+		</Style>
+	</Style>
+
+	<Style Selector="Border.loadingLogBorder">
+		<Setter Property="Margin" Value="22,15,22,15"/>
+		<Setter Property="Padding" Value="4"/>
+		<Setter Property="BorderBrush" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Background" Value="#FF0C0C0C"/>
+	</Style>
+	<Style Selector="ScrollViewer#LoadingLogScroll">
+		<Setter Property="UseLayoutRounding" Value="False"/>
+
+		<Style Selector="^ /template/ ScrollContentPresenter">
+			<Setter Property="Cursor" Value="Ibeam"/>
+		</Style>
+	</Style>
+	<Style Selector="SelectableTextBlock.log">
+		<Setter Property="Foreground" Value="#FFCCCCCC"/>
+		<Setter Property="SelectionBrush" Value="#FFF3F3F3"/>
+		<!-- It seems that `TextBlock` doesn't have the `SelectionForegroundBrush` property -->
+	</Style>
+
+
+	<Style Selector="Border.installInfoBorder">
+		<Setter Property="Margin" Value="22,0,22,15"/>
+		<Setter Property="Padding" Value="4"/>
+		<Setter Property="BorderBrush" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+	</Style>
+	<Style Selector="ScrollViewer#InstallInfoScroll">
+		<Style Selector="^ /template/ ScrollContentPresenter">
+			<Setter Property="Cursor" Value="Ibeam"/>
+		</Style>
+	</Style>
+	<Style Selector="SelectableTextBlock#InstallInfoText">
+		<Setter Property="SelectionBrush" Value="#FF92C1DC"/>
+	</Style>
+
+
+	<Style Selector="Border.installProgressBorder">
+		<Setter Property="Margin" Value="22,15,22,7"/>
+		<Setter Property="Padding" Value="3"/>
+		<Setter Property="BorderBrush" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+	</Style>
+	<Style Selector="StackPanel#InstallProgressPanel">
+		<Setter Property="IsEnabled" Value="False"/>
+	</Style>
+	<Style Selector="ProgressBar">
+		<Setter Property="Foreground" Value="#FF06B025"/>
+		<Setter Property="BorderBrush" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		
+		<Style Selector="^#InstallProgressBar">
+			<Setter Property="Margin" Value="0,6,0,0"/>
+			<Setter Property="Height" Value="18"/>
+			<Setter Property="IsIndeterminate" Value="True"/>
+		</Style>
+	</Style>
+	<Style Selector="Border.installLogBorder">
+		<Setter Property="Margin" Value="22,0,22,15"/>
+		<Setter Property="Padding" Value="4"/>
+		<Setter Property="BorderBrush" Value="{StaticResource WinGrayBrush}"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Background" Value="#FF0C0C0C"/>
+	</Style>
+	<Style Selector="ScrollViewer#InstallLogScroll">
+		<Setter Property="UseLayoutRounding" Value="False"/>
+		
+		<Style Selector="^ /template/ ScrollContentPresenter">
+			<Setter Property="Cursor" Value="Ibeam"/>
+		</Style>
+	</Style>
+</Styles>

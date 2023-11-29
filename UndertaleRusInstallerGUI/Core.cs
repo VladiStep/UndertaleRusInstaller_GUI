@@ -1,0 +1,879 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
+using UndertaleModLib;
+using static UndertaleModLib.UndertaleReader;
+using static UndertaleRusInstallerGUI.OSMethods;
+using UndertaleRusInstallerGUI.Views;
+using System.Collections;
+using System.Drawing;
+using System.IO.Compression;
+using System.Text.RegularExpressions;
+
+namespace UndertaleRusInstallerGUI;
+
+public static class Core
+{
+    public enum GameType : ushort
+    {
+        None,
+        Undertale,
+        NXTale
+    }
+    private enum BackupResult : ushort
+    {
+        SourceNotFound,
+        Error,
+        Success
+    }
+
+    public static MainWindow MainWindow { get; set; }
+
+    private const string utWinLocation = "{0}Program Files{1}\\Steam\\steamapps\\common\\Undertale\\";
+    private const string utMacLocation = "{0}/Library/Application Support/Steam/steamapps/common/Undertale/UNDERTALE.app/";
+    private static readonly string[] utLinuxLocations = { "{0}/.steam/steam/steamapps/common/Undertale/", "{0}/.local/share/steam/steamapps/common/Undertale/",
+                                                          "{0}/.steam/Steam/steamapps/common/Undertale/", "{0}/.local/share/Steam/steamapps/common/Undertale/" };
+    private const string utWinFileLoc = "data.win";
+    private const string utMacFileLoc = "Contents/Resources/game.ios";
+    private const string utLinuxFileLoc = "assets/game.unx";
+
+    private static readonly Regex utWinLocRegex = new(@"(.+\\)[^\\]+\.win$", RegexOptions.Compiled);
+    private static readonly Regex utLinuxLocRegex = new(@"(.+/)assets/[^/]+\.unx$", RegexOptions.Compiled);
+
+    private static readonly string currDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
+    public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
+    private static readonly string zipName = "ru_data.zip";
+	private static string gameDirLocation;
+    public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                                                            ? new[] { ".app", ".win", ".ios", ".unx" }
+                                                            : new[] { ".win", ".ios", ".unx" };
+    private static readonly (string Path, string Name) nxtaleExePath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) // This won't be used on Windows
+                                                                         ? ("runner", "runner") : ("Contents/MacOS/Mac_Runner", "Mac_Runner");
+
+    public static GameType SelectedGame { get; set; }
+    public static UndertaleData Data { get; set; }
+    public static string DataPath { get; set; }
+    public static bool ReplaceNXTaleExe { get; set; }
+    public static string NXTaleExePath => gameDirLocation + nxtaleExePath.Path;
+
+
+    public static bool IsDataPathValid(string dataPath)
+    {
+        return File.Exists(dataPath) && ValidDataExtensions.Any(x => dataPath.EndsWith(x));
+    }
+    public static string ChooseDataPath()
+    {
+        string[] types = ValidDataExtensions.Select(x => '*' + x).ToArray(); // ".win" -> "*.win"
+        string desc = $"Данные игры ({String.Join(", ", types)})";
+        string dataPath = OpenFileDialog($"Выберите файл данных {SelectedGame}", "", types.Length, types, desc, 0);
+        if (dataPath is null)
+            return null;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (dataPath.EndsWith(".app/")) // Файл приложения MacOS 
+            {
+                if (SelectedGame == GameType.NXTale)
+                    gameDirLocation = dataPath;
+                dataPath += utMacFileLoc;
+            }
+        }
+        else if (SelectedGame == GameType.NXTale)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Match linuxDir = utLinuxLocRegex.Match(dataPath);
+                if (linuxDir.Success)
+                    gameDirLocation = linuxDir.Groups[1].Value;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Match windowsDir = utWinLocRegex.Match(dataPath);
+                if (windowsDir.Success)
+                    gameDirLocation = windowsDir.Groups[1].Value;
+            }
+        }
+        if (!Directory.Exists(gameDirLocation))
+            gameDirLocation = null;
+
+        return dataPath;
+    }
+    public static string GetDefaultUTFilePath()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		{
+			foreach (var drive in DriveInfo.GetDrives().Select(d => d.Name))
+			{
+				string dirPath = String.Format(utWinLocation, drive, " (x86)");
+				string path = dirPath + utWinFileLoc;
+				if (File.Exists(path))
+				{
+					gameDirLocation = dirPath;
+					return path;
+				}
+
+				dirPath = String.Format(utWinLocation, drive, "");
+				path = dirPath + utWinFileLoc;
+				if (File.Exists(path))
+				{
+					gameDirLocation = dirPath;
+					return path;
+				}
+			}
+		}
+		else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+		{
+			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+			string dirPath = String.Format(utMacLocation, userDir);
+			string path = dirPath + utMacFileLoc;
+			if (File.Exists(path))
+			{
+				gameDirLocation = dirPath;
+				return path;
+			}
+		}
+		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+		{
+			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+			foreach (string pathFormat in utLinuxLocations)
+			{
+				string dirPath = String.Format(pathFormat, userDir);
+				string path = dirPath + utLinuxFileLoc;
+				if (File.Exists(path))
+				{
+					gameDirLocation = dirPath;
+					return path;
+				}
+			}
+		}
+
+		return null;
+    }
+
+    public static async Task<bool> LoadDataFile(WarningHandlerDelegate warnDelegate, MessageHandlerDelegate msgDelegate)
+    {
+        List<string> warnings = new();
+        UndertaleData data = null;
+
+        bool res = await Task.Run(() =>
+        {
+            try
+            {
+                using (var stream = new FileStream(DataPath, FileMode.Open, FileAccess.Read))
+                    data = UndertaleIO.Read(stream, warnDelegate, msgDelegate);
+            }
+            catch
+            {
+                MainWindow.ScriptError("Во время загрузки файла возникла ошибка.\n" +
+                                       "Текст ошибки смотрите в журнале загрузки.");
+
+                throw;
+            }
+
+            Data = data;
+
+            return true;
+        });
+
+        return res;
+    }
+
+    public static GameType CheckSelectedDataFile()
+    {
+        if (Data.GeneralInfo.FileName.Content != "UNDERTALE")
+            return GameType.None;
+
+        if (Data.IsGameMaker2())
+        {
+            if (Data.GameObjects.ByName("obj_mewmew_npc") is null)
+                return GameType.None;
+            else
+                return GameType.NXTale;
+        }
+        else
+        {
+            var menuDraw = Data.Code.ByName("gml_Object_obj_intromenu_Draw_0");
+            // `version = "1.08"`
+            if (menuDraw?.Instructions.Any(i => i.Type1 == UndertaleInstruction.DataType.String
+                                                && i.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strRef
+                                                && strRef.Resource.Content == "1.08") != true)
+            {
+                return GameType.None;
+            }
+        }
+
+        return GameType.Undertale;
+    }
+
+    private static string GetFolder(string path)
+    {
+        return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
+    }
+
+    //                                            msgDelegate(text, setStatus)
+    public static async Task<bool> MakeDataBackup(Action<string, bool> msgDelegate, Action<string> errorDelegate)
+    {
+        bool res = await Task.Run(() =>
+        {
+            string dataFolder = GetFolder(DataPath);
+            string dataName = Path.GetFileName(DataPath);
+
+            msgDelegate($"Создание резервной копии файла данных {SelectedGame}...", true);
+            string backupFolder = dataFolder + "backup";
+            string backupPath = Path.Combine(backupFolder, dataName);
+            if (File.Exists(backupPath))
+            {
+                bool rewrite = MainWindow.ScriptQuestion($"Резервная копия уже существует (путь - `{backupPath}`).\n" +
+                                                         "Заменить её?");
+                if (rewrite)
+                {
+                    try
+                    {
+                        File.Delete(backupPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        errorDelegate($"Не удалось удалить существующую резервную копию.\nОшибка - {ex}");
+                        return false;
+                    }
+                }
+                else
+                    return false;
+            }
+            else
+            {
+                if (!Directory.Exists(backupFolder))
+                    Directory.CreateDirectory(backupFolder);
+            }
+
+            try
+            {
+                File.Copy(DataPath, backupPath);
+            }
+            catch (Exception ex)
+            {
+                errorDelegate($"Не удалось создать резервную копию.\nОшибка - {ex}");
+                return false;
+            }
+            msgDelegate($"Резервная копия файла создана, путь:\n\"{backupPath}\".", false);
+
+            return true;
+        });
+
+        return res;
+    }
+
+    public static async Task ExtractNewData(Action<string, bool> msgDelegate)
+    {
+        string zipFilePath = null;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (currDirPath.EndsWith("/Contents/MacOS/"))
+                zipFilePath = Path.Combine(currDirPath[..^6], "Resources", zipName);
+        }
+        else
+            zipFilePath = Path.Combine(currDirPath, zipName);
+
+        if (!File.Exists(zipFilePath))
+            throw new ScriptException($"Ошибка - не найден архив с данными \"{zipFilePath}\".");
+
+        await Task.Run(() =>
+        {
+            msgDelegate("Распаковка архива с данными...", false);
+            ZipFile.ExtractToDirectory(zipFilePath, TempDirPath, true);
+        });
+    }
+    public static async Task DeleteTempData(Action<string, bool> msgDelegate)
+    {
+        if (!Directory.Exists(TempDirPath))
+            return;
+
+        await Task.Run(() =>
+        {
+            msgDelegate("Удаление остаточных файлов данных...", false);
+            Directory.Delete(TempDirPath, true);
+        });
+    }
+    public static async Task<bool> InstallMod(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate,
+                                              Action<string> statusMsgDeleg, Action<double> statusMaxDeleg,
+                                              Action valueIncrDeleg)
+    {
+        bool res = await Task.Run(() =>
+        {
+            MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
+
+            if (SelectedGame == GameType.NXTale)
+            {
+                if (!InstallToNXTalePart(msgDelegate, errorDelegate, warnDelegate))
+                    return false;
+            }
+
+            string packDir = TempDirPath + "Packager";
+            string gamePrefix = SelectedGame.ToString().ToLowerInvariant();
+            string srcGameDir = Path.Combine(TempDirPath, gamePrefix);
+            if (!Directory.Exists(srcGameDir))
+                throw new ScriptException($"Ошибка - не найдена папка \"{srcGameDir}\".");
+
+            string fontsDir = Path.Combine(TempDirPath, gamePrefix, "ru_fonts") + Path.DirectorySeparatorChar;
+            string spritesDir = Path.Combine(TempDirPath, gamePrefix, "ru_sprites") + Path.DirectorySeparatorChar;
+            string codeDir = Path.Combine(TempDirPath, gamePrefix, "code") + Path.DirectorySeparatorChar;
+            if (!Directory.Exists(fontsDir))
+                throw new ScriptException($"Ошибка - не найдена папка \"{fontsDir}\".");
+            if (!Directory.Exists(spritesDir))
+                throw new ScriptException($"Ошибка - не найдена папка \"{spritesDir}\".");
+            if (!Directory.Exists(codeDir))
+                throw new ScriptException($"Ошибка - не найдена папка \"{codeDir}\".");
+
+            #region Font import 
+            msgDelegate("Замена шрифтов...", false);
+            statusMsgDeleg("Импорт текстур шрифтов: ");
+            statusMaxDeleg(0);
+
+            Directory.CreateDirectory(packDir);
+            string sourcePath = fontsDir;
+            string searchPattern = "*.png";
+            string outName = Path.Combine(packDir, "atlas.txt");
+            int textureSize = 2048;
+            int border = 2;
+            bool debug = false;
+            Packer packer = new();
+            double max = 0;
+            try
+            {
+                packer.Process(sourcePath, searchPattern, textureSize, border, debug, valueIncrDeleg, statusMaxDeleg);
+                max = packer.Atlasses.SelectMany(x => x.Nodes).Count(x => x.Texture is not null);
+                statusMaxDeleg(max);
+                packer.SaveAtlasses(outName, valueIncrDeleg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message[0] == '.')
+                    throw new ScriptException($"Ошибка при импорте текстуры шрифта \"{Path.GetFileName(ex.Message[1..])}\":\n{ex}");
+                else
+                    throw new ScriptException($"Ошибка при замене шрифтов:\n{ex}");
+            }
+
+            statusMsgDeleg("Замена текстур шрифтов: ");
+            statusMaxDeleg(max);
+
+            int lastTextPage = Data.EmbeddedTextures.Count - 1;
+            int lastTextPageItem = Data.TexturePageItems.Count - 1;
+
+            string prefix = outName.Replace(Path.GetExtension(outName), "");
+            int atlasCount = 0;
+            foreach (Atlas atlas in packer.Atlasses)
+            {
+                string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
+                UndertaleEmbeddedTexture texture = new();
+                texture.Name = new UndertaleString("Texture " + ++lastTextPage);
+                texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
+                Data.EmbeddedTextures.Add(texture);
+                foreach (Node n in atlas.Nodes)
+                {
+                    if (n.Texture != null)
+                    {
+                        string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
+                        valueIncrDeleg();
+
+                        UndertaleTexturePageItem texturePageItem = new();
+                        lastTextPageItem++;
+                        texturePageItem.SourceX = (ushort)n.Bounds.X;
+                        texturePageItem.SourceY = (ushort)n.Bounds.Y;
+                        texturePageItem.SourceWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.SourceHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.TargetX = 0;
+                        texturePageItem.TargetY = 0;
+                        texturePageItem.TargetWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.TargetHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.BoundingWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.TexturePage = texture;
+                        Data.TexturePageItems.Add(texturePageItem);
+                        
+
+                        UndertaleFont font = null;
+                        font = Data.Fonts.ByName(stripped);
+
+                        if (font == null)
+                        {
+                            UndertaleString fontUTString = Data.Strings.MakeString(stripped);
+                            UndertaleFont newFont = new();
+                            newFont.Name = fontUTString;
+
+                            FontUpdate(sourcePath, ref newFont);
+                            newFont.Texture = texturePageItem;
+                            Data.Fonts.Add(newFont);
+                            continue;
+                        }
+
+                        FontUpdate(sourcePath, ref font);
+                        font.Texture = texturePageItem;
+                        UndertaleSprite.TextureEntry texentry = new();
+                        texentry.Texture = texturePageItem;
+                    }
+                }
+                atlasCount++;
+            }
+
+            Directory.Delete(packDir, true);
+            #endregion
+
+            #region Sprite import
+            msgDelegate("Замена спрайтов...", false);
+            statusMsgDeleg("Импорт текстур спрайтов: ");
+            statusMaxDeleg(0);
+
+            Directory.CreateDirectory(packDir);
+            sourcePath = spritesDir;
+            packer = new Packer();
+            try
+            {
+                packer.Process(sourcePath, searchPattern, textureSize, border, debug, valueIncrDeleg, statusMaxDeleg);
+                max = packer.Atlasses.SelectMany(x => x.Nodes).Count(x => x.Texture is not null);
+                statusMaxDeleg(max);
+                packer.SaveAtlasses(outName, valueIncrDeleg);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message[0] == '.')
+                    throw new ScriptException($"Ошибка при импорте спрайта \"{Path.GetFileName(ex.Message[1..])}\":\n{ex}");
+                else
+                    throw new ScriptException($"Ошибка при замене спрайтов:\n{ex}");
+            }
+
+            string[] newMasks = { "spr_wordfall1_ru_0", "spr_wordfall2_ru_0", "spr_wordfall3_ru_0", "spr_wordfall4_ru_0", "spr_wordfall5_ru_0", "spr_wordfall6_ru_0", "spr_wordfall7_ru_0", "spr_talkbt_hollow_ru_0", "spr_quittingmessage_ru_0", "spr_pressz_press_ru_0", "spr_oolbone_ru_0", "spr_itembt_hollow_ru_0", "spr_hpname_ru_0", "spr_fightbt_hollow_ru_0", "spr_egggraph_ru_0", "spr_dmgmiss_o_ru_0", "spr_dbone_ru_0", "spr_cbone_ru_0", "spr_bulletNapstaSad_ru_0", "spr_barktry_ru_0", "spr_actbt_center_hole_ru_0", "spr_6hope_ru_0" };
+
+            statusMsgDeleg("Замена текстур спрайтов: ");
+            statusMaxDeleg(max);
+
+            lastTextPage = Data.EmbeddedTextures.Count - 1;
+            lastTextPageItem = Data.TexturePageItems.Count - 1;
+
+            // Import everything into UMT
+            atlasCount = 0;
+            foreach (Atlas atlas in packer.Atlasses)
+            {
+                string atlasName = Path.Combine(packDir, String.Format(prefix + "{0:000}" + ".png", atlasCount));
+                Bitmap atlasBitmap = new(atlasName);
+                UndertaleEmbeddedTexture texture = new();
+                texture.Name = new UndertaleString("Texture " + ++lastTextPage);
+                texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
+                Data.EmbeddedTextures.Add(texture);
+                foreach (Node n in atlas.Nodes)
+                {
+                    if (n.Texture != null)
+                    {
+                        string stripped = Path.GetFileNameWithoutExtension(n.Texture.Source);
+                        valueIncrDeleg();
+
+                        // Initalize values of this texture
+                        UndertaleTexturePageItem texturePageItem = new();
+                        lastTextPageItem++;
+                        texturePageItem.SourceX = (ushort)n.Bounds.X;
+                        texturePageItem.SourceY = (ushort)n.Bounds.Y;
+                        texturePageItem.SourceWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.SourceHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.TargetX = 0;
+                        texturePageItem.TargetY = 0;
+                        texturePageItem.TargetWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.TargetHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.BoundingWidth = (ushort)n.Bounds.Width;
+                        texturePageItem.BoundingHeight = (ushort)n.Bounds.Height;
+                        texturePageItem.TexturePage = texture;
+
+                        // Add this texture to UMT
+                        Data.TexturePageItems.Add(texturePageItem);
+
+                        SpriteType spriteType = GetSpriteType(n.Texture.Source);
+
+                        SetTextureTargetBounds(ref texturePageItem, n);
+
+                        if (spriteType == SpriteType.Background)
+                        {
+                            UndertaleBackground background = Data.Backgrounds.ByName(stripped);
+                            if (background != null)
+                            {
+                                background.Texture = texturePageItem;
+                            }
+                            else
+                            {
+                                // No background found, let's make one
+                                UndertaleString backgroundUTString = Data.Strings.MakeString(stripped);
+                                UndertaleBackground newBackground = new();
+                                newBackground.Name = backgroundUTString;
+                                newBackground.Transparent = false;
+                                newBackground.Preload = false;
+                                newBackground.Texture = texturePageItem;
+                                Data.Backgrounds.Add(newBackground);
+                            }
+                        }
+                        else if (spriteType == SpriteType.Sprite)
+                        {
+                            // Get sprite to add this texture to
+                            string spriteName;
+                            int lastUnderscore, frame;
+                            try
+                            {
+                                lastUnderscore = stripped.LastIndexOf('_');
+                                spriteName = stripped[..lastUnderscore];
+                                frame = Int32.Parse(stripped[(lastUnderscore + 1)..]);
+                            }
+                            catch
+                            {
+                                throw new ScriptException("Изображение " + stripped + " имеет неправильное имя.");
+                            }
+                            UndertaleSprite sprite = null;
+                            sprite = Data.Sprites.ByName(spriteName);
+
+                            // Create TextureEntry object
+                            UndertaleSprite.TextureEntry texentry = new();
+                            texentry.Texture = texturePageItem;
+
+                            UndertaleSprite origSprite = Data.Sprites.ByName(spriteName[..spriteName.LastIndexOf('_')]);
+
+                            // Set values for new sprites
+                            if (sprite == null)
+                            {
+                                UndertaleString spriteUTString = Data.Strings.MakeString(spriteName);
+                                UndertaleSprite newSprite = new();
+                                newSprite.Name = spriteUTString;
+                                newSprite.Width = (uint)n.Bounds.Width;
+                                newSprite.Height = (uint)n.Bounds.Height;
+                                if (origSprite != null)
+                                {
+                                    newSprite.MarginLeft = origSprite.MarginLeft;
+                                    newSprite.MarginRight = origSprite.MarginRight;
+                                    newSprite.MarginTop = origSprite.MarginTop;
+                                    newSprite.MarginBottom = origSprite.MarginBottom;
+                                    newSprite.OriginX = origSprite.OriginX;
+                                    newSprite.OriginY = origSprite.OriginY;
+                                }
+                                else
+                                {
+                                    newSprite.MarginLeft = 0;
+                                    newSprite.MarginRight = n.Bounds.Width - 1;
+                                    newSprite.MarginTop = 0;
+                                    newSprite.MarginBottom = n.Bounds.Height - 1;
+                                    newSprite.OriginX = 0;
+                                    newSprite.OriginY = 0;
+                                }
+                                if (origSprite != null)
+                                {
+                                    newSprite.OriginX = origSprite.OriginX;
+                                    newSprite.OriginY = origSprite.OriginY;
+                                }
+                                if (frame > 0)
+                                {
+                                    for (int i = 0; i < frame; i++)
+                                        newSprite.Textures.Add(null);
+                                }
+
+                                newSprite.CollisionMasks.Add(newSprite.NewMaskEntry());
+                                if (origSprite != null && !newMasks.Contains(stripped)
+                                    && newSprite.CollisionMasks[0].Data.Length == origSprite.CollisionMasks[0].Data.Length)
+                                {
+                                    for (int i = 0; i < origSprite.CollisionMasks[0].Data.Length; i++)
+                                        newSprite.CollisionMasks[0].Data[i] = origSprite.CollisionMasks[0].Data[i];
+                                }
+                                else
+                                {
+                                    Rectangle bmpRect = new(n.Bounds.X, n.Bounds.Y, n.Bounds.Width, n.Bounds.Height);
+                                    System.Drawing.Imaging.PixelFormat format = atlasBitmap.PixelFormat;
+                                    Bitmap cloneBitmap = atlasBitmap.Clone(bmpRect, format);
+                                    int width = ((n.Bounds.Width + 7) / 8) * 8;
+                                    BitArray maskingBitArray = new(width * n.Bounds.Height);
+                                    for (int y = 0; y < n.Bounds.Height; y++)
+                                    {
+                                        for (int x = 0; x < n.Bounds.Width; x++)
+                                        {
+                                            Color pixelColor = cloneBitmap.GetPixel(x, y);
+                                            maskingBitArray[y * width + x] = (pixelColor.A > 0);
+                                        }
+                                    }
+                                    BitArray tempBitArray = new(width * n.Bounds.Height);
+                                    for (int i = 0; i < maskingBitArray.Length; i += 8)
+                                    {
+                                        for (int j = 0; j < 8; j++)
+                                        {
+                                            tempBitArray[j + i] = maskingBitArray[-(j - 7) + i];
+                                        }
+                                    }
+                                    int numBytes;
+                                    numBytes = maskingBitArray.Length / 8;
+                                    byte[] bytes = new byte[numBytes];
+                                    tempBitArray.CopyTo(bytes, 0);
+                                    for (int i = 0; i < bytes.Length; i++)
+                                        newSprite.CollisionMasks[0].Data[i] = bytes[i];
+                                }
+                                newSprite.Textures.Add(texentry);
+                                Data.Sprites.Add(newSprite);
+                                continue;
+                            }
+                            if (frame > sprite.Textures.Count - 1)
+                            {
+                                while (frame > sprite.Textures.Count - 1)
+                                    sprite.Textures.Add(texentry);
+
+                                continue;
+                            }
+                            sprite.Textures[frame] = texentry;
+                        }
+                    }
+                }
+                // Increment atlas
+                atlasCount++;
+                atlasBitmap.Dispose();
+            }
+
+            Directory.Delete(packDir, true);
+            #endregion
+
+            #region Code replacement
+            string[] codeFiles = Directory.GetFiles(codeDir, "*.gml").OrderBy(x => x).ToArray();
+
+            msgDelegate("Замена кода...", false);
+            statusMsgDeleg("Импорт и замена кода: ");
+            statusMaxDeleg(codeFiles.Length);
+            foreach (var file in codeFiles)
+            {
+                valueIncrDeleg();
+
+                int lastIndexOfSep = file.LastIndexOf(Path.DirectorySeparatorChar);
+                try
+                {
+                    MainWindow.ImportGMLString(file.Substring(lastIndexOfSep + 1, file.IndexOf(".", lastIndexOfSep + 1) - lastIndexOfSep - 1), File.ReadAllText(file));
+                }
+                catch (Exception ex)
+                {
+                    throw new ScriptException($"Ошибка при импорте файла кода \"{Path.GetFileName(file)}\":\n{ex}");
+                }
+            }
+            #endregion
+
+            #region Saving the game data file
+            msgDelegate("Сохранение файла игровых данных...", true);
+            string tempFilePath = DataPath + "temp";
+            try
+            {
+                using (var stream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
+                    UndertaleIO.Write(stream, Data);
+
+                if (File.Exists(DataPath))
+                    File.Delete(DataPath);
+                File.Move(tempFilePath, DataPath);
+            }
+            catch (Exception ex)
+            {
+                errorDelegate($"Произошла ошибка при сохранении файла игровых данных - {ex}");
+                if (File.Exists(tempFilePath))
+                    File.Delete(tempFilePath);
+
+                return false;
+            }
+            #endregion
+
+            return true;
+        });
+
+        return res;
+    }
+    private static bool InstallToNXTalePart(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            if (!ReplaceNXTaleExe)
+                return true;
+
+            BackupResult backupRes = MakeExecutableBackup(msgDelegate, errorDelegate, warnDelegate);
+            if (backupRes == BackupResult.Error)
+            {
+                bool proceed = MainWindow.ScriptQuestion("Исполняемый файл игры не будет заменён, так как не получилось сделать его резервную копию.\n" +
+                                                         "Всё равно устанавливать русификатор?");
+                if (!proceed)
+                    return false;
+            }
+            if (!ReplaceExecutable(backupRes, msgDelegate, errorDelegate))
+            {
+                bool proceed = MainWindow.ScriptQuestion("Не получилось заменить исполняемый файл игры.\nВсё равно продолжить установку?");
+                if (!proceed)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+    private static BackupResult MakeExecutableBackup(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
+    {
+        msgDelegate("Создание резервной копии исполняемого файла игры...", true);
+
+        if (gameDirLocation is null)
+        {
+            warnDelegate("Внимание - не удалось найти путь папки с игрой.");
+            return BackupResult.Error;
+        }
+
+        string exePath = gameDirLocation + nxtaleExePath.Path;
+        if (!File.Exists(exePath))
+        {
+            warnDelegate("Внимание - не найден исполняемый файл игры.");
+            return BackupResult.SourceNotFound;
+        }
+
+        string exeName = Path.GetFileName(exePath);
+        string backupFolder = GetFolder(exePath) + "backup";
+        string backupPath = Path.Combine(backupFolder, exeName);
+        if (File.Exists(backupPath))
+        {
+            bool rewrite = MainWindow.ScriptQuestion($"Резервная копия уже существует (путь - \"{backupPath}\").\n" +
+                                                     "Заменить её?");
+            if (rewrite)
+            {
+                try
+                {
+                    File.Delete(backupPath);
+                }
+                catch (Exception ex)
+                {
+                    errorDelegate($"Не удалось удалить существующую резервную копию.\nОшибка - {ex.Message}");
+                    return BackupResult.Error;
+                }
+            }
+            else
+                return BackupResult.Error;
+        }
+        else
+        {
+            if (!Directory.Exists(backupFolder))
+                Directory.CreateDirectory(backupFolder);
+        }
+
+        try
+        {
+            File.Copy(exePath, backupPath);
+        }
+        catch (Exception ex)
+        {
+            errorDelegate($"Не удалось создать резервную копию.\nОшибка - {ex.Message}");
+            return BackupResult.Error;
+        }
+        msgDelegate($"Резервная копия исполняемого файла игры создана, путь - \"{backupPath}\"\n", false);
+
+        return BackupResult.Success;
+    }
+    private static bool ReplaceExecutable(BackupResult backupRes, Action<string, bool> msgDelegate, Action<string> errorDelegate)
+    {
+        if (backupRes == BackupResult.Success)
+            msgDelegate("Замена исполняемого файла игры...", true);
+        else if (backupRes == BackupResult.SourceNotFound)
+            msgDelegate("Копирование исполняемого файла игры...", true);
+        else
+            return true;
+
+        string exePath = gameDirLocation + nxtaleExePath.Path;
+        string srcExePath = Path.Combine(TempDirPath, "nxtale", nxtaleExePath.Name);
+        if (!File.Exists(srcExePath))
+        {
+            errorDelegate($"Ошибка - не найдена замена для исполняемого файла игры, путь - \"{srcExePath}\".");
+            return false;
+        }
+
+        try
+        {
+            if (File.Exists(exePath))
+                File.Delete(exePath);
+            File.Copy(srcExePath, exePath);
+        }
+        catch (Exception ex)
+        {
+            MainWindow.ScriptMessage($"Произошла ошибка при замене исполняемого файла игры - {ex}");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void FontUpdate(string sourcePath, ref UndertaleFont newFont)
+    {
+        using (StreamReader reader = new(sourcePath + "glyphs_" + newFont.Name.Content + ".csv"))
+        {
+            newFont.Glyphs.Clear();
+            string line;
+            int head = 0;
+            while ((line = reader.ReadLine()) != null)
+            {
+                string[] s = line.Split(';');
+
+                if (head == 1)
+                {
+                    newFont.RangeStart = UInt16.Parse(s[0]);
+                    head++;
+                }
+
+                if (head == 0)
+                {
+                    string name = s[0].Replace("\"", "");
+                    newFont.DisplayName = Data.Strings.MakeString(name);
+                    newFont.EmSize = UInt16.Parse(s[1]);
+                    newFont.Bold = Boolean.Parse(s[2]);
+                    newFont.Italic = Boolean.Parse(s[3]);
+                    newFont.Charset = Byte.Parse(s[4]);
+                    newFont.AntiAliasing = Byte.Parse(s[5]);
+                    newFont.ScaleX = UInt16.Parse(s[6]);
+                    newFont.ScaleY = UInt16.Parse(s[7]);
+                    head++;
+                }
+
+                if (head > 1)
+                {
+                    newFont.Glyphs.Add(new UndertaleFont.Glyph()
+                    {
+                        Character = UInt16.Parse(s[0]),
+                        SourceX = UInt16.Parse(s[1]),
+                        SourceY = UInt16.Parse(s[2]),
+                        SourceWidth = UInt16.Parse(s[3]),
+                        SourceHeight = UInt16.Parse(s[4]),
+                        Shift = Int16.Parse(s[5]),
+                        Offset = Int16.Parse(s[6]),
+                    });
+                    newFont.RangeEnd = UInt32.Parse(s[0]);
+                }
+            }
+        }
+    }
+    private static void SetTextureTargetBounds(ref UndertaleTexturePageItem tex, Node n)
+    {
+        tex.TargetX = 0;
+        tex.TargetY = 0;
+        tex.TargetWidth = (ushort)n.Bounds.Width;
+        tex.TargetHeight = (ushort)n.Bounds.Height;
+    }
+    private enum SpriteType
+    {
+        Sprite,
+        Background,
+        Font,
+        Unknown
+    }
+    private static SpriteType GetSpriteType(string path)
+    {
+        string folderPath = Path.GetDirectoryName(path);
+        string folderName = new DirectoryInfo(folderPath).Name;
+        string lowerName = folderName.ToLower();
+
+        if (lowerName == "backgrounds" || lowerName == "background")
+            return SpriteType.Background;
+        else if (lowerName == "fonts" || lowerName == "font")
+            return SpriteType.Font;
+        else if (lowerName == "sprites" || lowerName == "sprite")
+            return SpriteType.Sprite;
+
+        return SpriteType.Unknown;
+    }
+}

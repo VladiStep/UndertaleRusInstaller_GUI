@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:UndertaleRusInstallerGUI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:UndertaleRusInstallerGUI.Views"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="360"
+        Width="500" Height="360" MinWidth="500" MinHeight="360" 
+        Background="{StaticResource WinLightGrayBrush}"
+        x:Class="UndertaleRusInstallerGUI.Views.MainWindow"
+        Icon="/Assets/rus_heart.ico"
+        Title="Установка русификатора Undertale/NXTale"
+		Closing="Window_Closing"
+		DataContext="{Binding $self}">
+    <Window.Styles>
+        <StyleInclude Source="/Styles/AppStyles.axaml"/>
+    </Window.Styles>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition MinHeight="310"/>
+            <RowDefinition Height="1"/>
+            <RowDefinition Height="49"/>
+        </Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+        
+		<ContentControl Grid.Row="0" Grid.ColumnSpan="2" Name="CurrentPartControl"
+						Content="{Binding Parts[0]}"/>
+		
+		<TextBlock Grid.Row="1" Grid.Column="0" Name="CopyrightText"
+				   Height="14" IsVisible="False"/>
+        <Rectangle Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" Name="SeparatorRect"/>
+        <Panel Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" Margin="0,14,11,14">
+                <Button Name="BackButton" Classes="button" Click="BackButton_Click" IsVisible="False">&lt; Назад</Button>
+                <Button Name="NextButton" Classes="blueButton" Click="NextButton_Click">Далее &gt;</Button>
+                <Button Name="CancelButton" Classes="blueButton" Click="CancelButton_Click" Margin="13,0,0,0">Отмена</Button>
+            </StackPanel>
+        </Panel>
+    </Grid>
+</Window>

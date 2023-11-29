@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.ConfirmInstallView"
+			 Background="{StaticResource WinLightGrayBrush}"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Background="White">
+			<Image Width="150" Height="60" Source="/Assets/confirm_install.png"/>
+			<StackPanel Margin="9,7,0,0">
+				<TextBlock Classes="littleHeader">Всё готово для начала установки</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Установщик готов устанавливать русификатор.</TextBlock>
+			</StackPanel>
+		</StackPanel>
+		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
+
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,13,22,10">
+			<TextBlock Classes="normal">
+				Нажмите "Установить" для начала установки или "Назад", чтобы проверить или заново ввести информацию для установки.
+			</TextBlock>
+			<TextBlock Classes="normal" Name="BackupText">
+				Перед установкой будет сделана резервная копия файла данных игры.
+			</TextBlock>
+		</StackPanel>
+		<Border Grid.Row="3" Grid.ColumnSpan="2" Classes="installInfoBorder">
+			<ScrollViewer Name="InstallInfoScroll" BringIntoViewOnFocusChange="False"
+						  PointerPressed="ScrollViewer_PointerPressed" PointerReleased="ScrollViewer_PointerReleased">
+				<SelectableTextBlock Classes="normal" Name="InstallInfoText">
+					фывыфвыф:<LineBreak/>
+					<Run Text="&#x09;1232132421"/><LineBreak/>
+					<LineBreak/>
+					фывыфвыф:<LineBreak/>
+					<Run Text="&#x09;1232132421"/><LineBreak/>
+					<LineBreak/>
+				</SelectableTextBlock>
+			</ScrollViewer>
+		</Border>
+	</Grid>
+</UserControl>

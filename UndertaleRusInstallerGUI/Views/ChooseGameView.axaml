@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.ChooseGameView"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree"
+			 Background="{StaticResource WinLightGrayBrush}">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal"
+					Background="White">
+			<Image Width="150" Height="60" Source="/Assets/choose_game.png"/>
+			<StackPanel Margin="9,7,0,0">
+				<TextBlock Classes="littleHeader">Выбор игры</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Выберите игру для установки русификатора.</TextBlock>
+			</StackPanel>
+		</StackPanel>
+		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
+
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
+			<TextBlock Classes="normal" Margin="0,0,0,5">Выберите:</TextBlock>
+			<RadioButton GroupName="Game" Click="UTRadioButton_Click">Undertale</RadioButton>
+			<RadioButton GroupName="Game" Click="NXTRadioButton_Click">
+				<TextBlock>
+					NXTale <Run Classes="footnote">(мод для Undertale)</Run>
+				</TextBlock>
+			</RadioButton>
+		</StackPanel>
+	</Grid>
+</UserControl>
