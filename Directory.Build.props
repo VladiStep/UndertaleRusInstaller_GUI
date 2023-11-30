@@ -2,5 +2,13 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <AvaloniaVersion>11.0.5</AvaloniaVersion>
+	
+	<CompanyName>VladStepu2001</CompanyName>
+	<Copyright>Copyright © 2023</Copyright>
+	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<FileVersion>1.0.1</FileVersion>
+	<Version>1.0.1</Version>
+	<Product>Установщик русификатора Undertale/NXTale</Product>
+	<AssemblyTitle>UndertaleRusInstallerGUI</AssemblyTitle>
   </PropertyGroup>
 </Project>
