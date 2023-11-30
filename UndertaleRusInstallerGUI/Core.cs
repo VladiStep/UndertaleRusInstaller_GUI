@@ -38,8 +38,8 @@ public static class Core
 
     private const string utWinLocation = "{0}Program Files{1}\\Steam\\steamapps\\common\\Undertale\\";
     private const string utMacLocation = "{0}/Library/Application Support/Steam/steamapps/common/Undertale/UNDERTALE.app/";
-    private static readonly string[] utLinuxLocations = { "{0}/.steam/steam/steamapps/common/Undertale/", "{0}/.local/share/steam/steamapps/common/Undertale/",
-                                                          "{0}/.steam/Steam/steamapps/common/Undertale/", "{0}/.local/share/Steam/steamapps/common/Undertale/" };
+    private static readonly string[] utLinuxLocations = { "{0}/.local/share/steam/steamapps/common/Undertale/",
+                                                          "{0}/.local/share/Steam/steamapps/common/Undertale/" };
     private const string utWinFileLoc = "data.win";
     private const string utMacFileLoc = "Contents/Resources/game.ios";
     private const string utLinuxFileLoc = "assets/game.unx";
