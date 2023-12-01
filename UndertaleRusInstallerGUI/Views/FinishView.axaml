@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:main="clr-namespace:UndertaleRusInstallerGUI"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
              x:Class="UndertaleRusInstallerGUI.Views.FinishView"
              Background="White"
@@ -20,22 +21,7 @@
         </Grid.ColumnDefinitions>
 
         <Image Grid.Column="0" Source="/Assets/finish.png" Stretch="None" VerticalAlignment="Top"/>
-        <Border Grid.Column="0" Grid.Row="1">
-            <Border.Background>
-                <DrawingBrush TileMode="Tile" Stretch="None" DestinationRect="0,12,1,15">
-                    <DrawingBrush.Drawing>
-                        <DrawingGroup>
-                            <GeometryDrawing Brush="#FF7F2600">
-                                <RectangleGeometry Rect="0,0,160,3" />
-                            </GeometryDrawing>
-                            <GeometryDrawing Brush="#FFA64A00">
-                                <RectangleGeometry Rect="0,3,160,12" />
-                            </GeometryDrawing>
-                        </DrawingGroup>
-                    </DrawingBrush.Drawing>
-                </DrawingBrush>
-            </Border.Background>
-        </Border>
+        <main:PlanksControl Grid.Column="0" Grid.Row="1"/>
         <StackPanel Grid.Column="1" Margin="16">
             <TextBlock Classes="header" Name="HeaderSuccessText">
                 Установка русификатора _ успешно завершена
