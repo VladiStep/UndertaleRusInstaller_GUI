@@ -38,8 +38,8 @@ public static class Core
 
     private const string utWinLocation = "{0}Program Files{1}\\Steam\\steamapps\\common\\Undertale\\";
     private const string utMacLocation = "{0}/Library/Application Support/Steam/steamapps/common/Undertale/UNDERTALE.app/";
-    private static readonly string[] utLinuxLocations = { "{0}/.local/share/steam/steamapps/common/Undertale/",
-                                                          "{0}/.local/share/Steam/steamapps/common/Undertale/" };
+    private static readonly string[] utLinuxLocations = { "{0}/.steam/steam/steamapps/common/Undertale/", "{0}/.local/share/steam/steamapps/common/Undertale/",
+                                                          "{0}/.steam/Steam/steamapps/common/Undertale/", "{0}/.local/share/Steam/steamapps/common/Undertale/" };
     private const string utWinFileLoc = "data.win";
     private const string utMacFileLoc = "Contents/Resources/game.ios";
     private const string utLinuxFileLoc = "assets/game.unx";
@@ -215,6 +215,34 @@ public static class Core
     private static string GetFolder(string path)
     {
         return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
+    }
+
+    public static List<UndertaleEmbeddedTexture> GetRussianTexturePages()
+    {
+        if (Data.EmbeddedTextures.Count < 4)
+            return null;
+
+        List<UndertaleEmbeddedTexture> ruTextures = new(2);
+        foreach (var texture in Data.EmbeddedTextures.TakeLast(2))
+        {
+            int matchingSprCount = 0;
+            int totalSprCount = 0;
+            foreach (var item in Data.TexturePageItems.Where(x => x.TexturePage == texture))
+            {
+                var sprite = Data.Sprites.FirstOrDefault(s => s.Textures.Any(x => x.Texture == item));
+                if (sprite?.Name?.Content is null)
+                    continue;
+
+                if (sprite.Name.Content.EndsWith("_ru"))
+                    matchingSprCount++;
+                totalSprCount++;
+            }
+
+            if (matchingSprCount / (double)totalSprCount >= 0.9)
+                ruTextures.Add(texture);
+        }
+
+        return ruTextures;
     }
 
     //                                            msgDelegate(text, setStatus)

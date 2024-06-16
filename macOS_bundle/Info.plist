@@ -5,7 +5,7 @@
 	<key>CFBundleIconFile</key>
 	<string>icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>UndertaleRusInstaller</string>
+	<string>com.coolasheck.undertalerusinstaller</string>
 	<key>CFBundleName</key>
 	<string>Установщик русификатора UT/NXTale</string>
 	<key>CFBundleDisplayName</key>
@@ -15,7 +15,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>CFBundleExecutable</key>
-	<string>UndertaleRusInstallerGUI.Desktop</string>
+	<string>UndertaleRusInstaller</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
@@ -17,7 +18,18 @@ namespace UndertaleRusInstallerGUI
         private readonly ImmutableSolidColorBrush mainColor = new(Color.FromRgb(166, 74, 0));
         private readonly ImmutableSolidColorBrush borderColor = new(Color.FromRgb(127, 38, 0));
         private readonly Dictionary<double, double> vertGaps = new(); // <yMult, x>
-        private readonly Bitmap dogBMP = new(AssetLoader.Open(new Uri("avares://UndertaleRusInstallerGUI/Assets/finish_dog.png")));
+        private Bitmap dogBMP;
+
+        protected override void OnLoaded(RoutedEventArgs e)
+        {
+            try
+            {
+                dogBMP = new(AssetLoader.Open(new Uri("avares://UndertaleRusInstallerGUI/Assets/finish_dog.png")));
+            }
+            catch { }
+
+            base.OnLoaded(e);
+        }
 
         public override void Render(DrawingContext context)
         {
@@ -59,7 +71,7 @@ namespace UndertaleRusInstallerGUI
                     context.DrawRectangle(borderColor, null, new Rect(gap.Value, 3 + gap.Key * 15 + yOffset, 3, 12));
             }
 
-            if (max > 7)
+            if (max > 7 && dogBMP is not null)
                 context.DrawImage(dogBMP, new Rect(10, 10 * 10, dogBMP.Size.Width, dogBMP.Size.Height));
 
             base.Render(context);
