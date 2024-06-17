@@ -21,13 +21,13 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Background="White">
+		<DockPanel Grid.Row="0" Grid.ColumnSpan="2" Background="White">
 			<Image Width="150" Height="60" Source="/Assets/choose_data_file.png"/>
 			<StackPanel Margin="9,7,0,0">
 				<TextBlock Classes="littleHeader">Выбор файла</TextBlock>
 				<TextBlock Classes="normal littleSubHeader">Укажите расположение файла данных игры.</TextBlock>
 			</StackPanel>
-		</StackPanel>
+		</DockPanel>
 		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
 
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
@@ -35,7 +35,7 @@
 					   IsVisible="False"/>
 			<HeaderedContentControl Name="DataPathHeader">
 				<StackPanel Orientation="Horizontal">
-					<TextBox Name="DataPathBox" TextChanging="DataPathBox_TextChanging"/>
+					<TextBox Name="DataPathBox" Classes="pathBox" TextChanging="DataPathBox_TextChanging"/>
 					<Button Classes="button" Click="BrowseButton_Click">Обзор...</Button>
 				</StackPanel>
 			</HeaderedContentControl>

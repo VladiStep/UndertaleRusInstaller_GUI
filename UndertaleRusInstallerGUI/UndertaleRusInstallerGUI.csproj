@@ -61,5 +61,8 @@
     <Compile Update="Views\StartView.axaml.cs">
       <DependentUpon>StartView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\ChooseArchivePathView.axaml.cs">
+      <DependentUpon>ChooseArchivePathView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

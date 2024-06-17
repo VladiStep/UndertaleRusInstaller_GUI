@@ -20,6 +20,7 @@ public partial class MainWindow : Window
             new StartView(this),
             new ChooseGameView(this),
             new ChooseDataFileView(this),
+            new ChooseArchivePathView(this),
             new LoadGameView(this),
             new ConfirmInstallView(this),
             new InstallModView(this),
@@ -48,7 +49,6 @@ public partial class MainWindow : Window
     {
         CopyrightText.IsVisible = state;
         SeparatorRect.Margin = state ? copyrightMargin : default;
-
     }
     public void GoBack()
     {

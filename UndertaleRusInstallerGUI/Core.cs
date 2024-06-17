@@ -33,6 +33,12 @@ public static class Core
         Error,
         Success
     }
+    public enum FileStatus : ushort
+    {
+        NotFound,
+        Empty,
+        OK
+    }
 
     public static MainWindow MainWindow { get; set; }
 
@@ -47,9 +53,9 @@ public static class Core
     private static readonly Regex utWinLocRegex = new(@"(.+\\)[^\\]+\.win$", RegexOptions.Compiled);
     private static readonly Regex utLinuxLocRegex = new(@"(.+/)assets/[^/]+\.unx$", RegexOptions.Compiled);
 
-    private static readonly string currDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
+    public static readonly string CurrDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
     public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
-    private static readonly string zipName = "ru_data.zip";
+    public static readonly string ZipName = "ru_data.zip";
     private static string gameDirLocation;
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
@@ -63,10 +69,40 @@ public static class Core
     public static bool ReplaceNXTaleExe { get; set; }
     public static string NXTaleExePath => gameDirLocation + nxtaleExePath.Path;
 
+    public static string ZipPath { get; set; }
+    public static bool ZipIsValid { get; set; } = true; 
+
+    public static long GetFileSize(string path)
+    {
+        return new FileInfo(path).Length;
+    }
+
+    public static FileStatus IsZipPathValid(string zipPath, bool checkName = true)
+    {
+        FileStatus res = FileStatus.OK;
+        if ((checkName && !zipPath.EndsWith(ZipName)) || !File.Exists(zipPath))
+            res = FileStatus.NotFound;
+        else if (GetFileSize(zipPath) == 0)
+            res = FileStatus.Empty;
+
+        ZipIsValid = (res == FileStatus.OK);
+
+        return res;
+    }
+    public static string ChooseZipPath()
+    {
+        string[] types = { "*.zip" };
+        string desc = $"Архив с данными русификатора (*.zip)";
+        string zipPath = OpenFileDialog($"Выберите архив с данными русификатора", ZipName, 1, types, desc, 0);
+
+        return zipPath;
+    }
 
     public static bool IsDataPathValid(string dataPath)
     {
-        return File.Exists(dataPath) && ValidDataExtensions.Any(x => dataPath.EndsWith(x));
+        return dataPath.Length >= 5 // "a.win"
+               && File.Exists(dataPath)
+               && ValidDataExtensions.Any(x => dataPath.EndsWith(x));
     }
     public static string ChooseDataPath()
     {
@@ -300,22 +336,13 @@ public static class Core
 
     public static async Task ExtractNewData(Action<string, bool> msgDelegate)
     {
-        string zipFilePath = null;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            if (currDirPath.EndsWith("/Contents/MacOS/"))
-                zipFilePath = Path.Combine(currDirPath[..^6], "Resources", zipName);
-        }
-        else
-            zipFilePath = Path.Combine(currDirPath, zipName);
-
-        if (!File.Exists(zipFilePath))
-            throw new ScriptException($"Ошибка - не найден архив с данными \"{zipFilePath}\".");
+        if (!File.Exists(ZipPath))
+            throw new ScriptException($"Ошибка - не найден архив с данными \"{ZipPath}\".");
 
         await Task.Run(() =>
         {
             msgDelegate("Распаковка архива с данными...", false);
-            ZipFile.ExtractToDirectory(zipFilePath, TempDirPath, true);
+            ZipFile.ExtractToDirectory(ZipPath, TempDirPath, true);
         });
     }
     public static async Task DeleteTempData(Action<string, bool> msgDelegate)

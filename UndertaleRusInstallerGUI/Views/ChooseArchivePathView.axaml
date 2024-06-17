@@ -3,9 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
-             x:Class="UndertaleRusInstallerGUI.Views.LoadGameView"
+             x:Class="UndertaleRusInstallerGUI.Views.ChooseArchivePathView"
 			 Background="{StaticResource WinLightGrayBrush}"
-			 AttachedToVisualTree="UserControl_AttachedToVisualTree">
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree"
+			 DetachedFromVisualTree="UserControl_DetachedFromVisualTree">
 	<UserControl.Styles>
 		<StyleInclude Source="/Styles/AppStyles.axaml"/>
 	</UserControl.Styles>
@@ -21,19 +22,23 @@
 		</Grid.ColumnDefinitions>
 
 		<DockPanel Grid.Row="0" Grid.ColumnSpan="2" Background="White">
-			<Image Width="150" Height="60" Source="/Assets/load_game.png"/>
+			<Image Width="150" Height="60" Source="/Assets/choose_zip_path.png"/>
 			<StackPanel Margin="9,7,0,0">
-				<TextBlock Classes="littleHeader">Загрузка игры</TextBlock>
-				<TextBlock Classes="normal littleSubHeader">Загрузка и проверка данных игры.</TextBlock>
+				<TextBlock Classes="littleHeader">Выбор архива</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Укажите расположение архива с данными русификатора.</TextBlock>
 			</StackPanel>
 		</DockPanel>
 		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
 
-		<Border Grid.Row="2" Grid.ColumnSpan="2" Classes="loadingLogBorder">
-			<ScrollViewer Name="LoadingLogScroll" BringIntoViewOnFocusChange="False"
-						  PointerPressed="ScrollViewer_PointerPressed" PointerReleased="ScrollViewer_PointerReleased">
-				<SelectableTextBlock Classes="normal log" Name="LoadingLogText"/>
-			</ScrollViewer>
-		</Border>
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
+			<TextBlock Classes="normal" Name="CheckResultText" Margin="0,0,0,13"
+					   IsVisible="False"/>
+			<HeaderedContentControl Name="ZipPathHeader">
+				<StackPanel Orientation="Horizontal">
+					<TextBox Name="ZipPathBox" Classes="pathBox" TextChanging="ZipPathBox_TextChanging"/>
+					<Button Classes="button" Click="BrowseButton_Click">Обзор...</Button>
+				</StackPanel>
+			</HeaderedContentControl>
+		</StackPanel>
 	</Grid>
 </UserControl>

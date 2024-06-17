@@ -21,13 +21,13 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Background="White">
+		<DockPanel Grid.Row="0" Grid.ColumnSpan="2" Background="White">
 			<Image Width="150" Height="60" Source="/Assets/confirm_install.png"/>
 			<StackPanel Margin="9,7,0,0">
 				<TextBlock Classes="littleHeader">Всё готово для начала установки</TextBlock>
 				<TextBlock Classes="normal littleSubHeader">Установщик готов устанавливать русификатор.</TextBlock>
 			</StackPanel>
-		</StackPanel>
+		</DockPanel>
 		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
 
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,13,22,10">

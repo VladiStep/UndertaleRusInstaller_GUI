@@ -95,8 +95,7 @@ namespace UndertaleRusInstallerGUI.Views
             if (mainWindow is null)
                 return;
 
-            bool nextButtonState = DataPathBox.Text?.Length >= 5 // "a.win"
-                                   && IsDataPathValid(DataPathBox.Text);
+            bool nextButtonState = IsDataPathValid(DataPathBox.Text);
             mainWindow.ChangeNextButtonState(nextButtonState);
 
             if (nextButtonState && cleanResultText)

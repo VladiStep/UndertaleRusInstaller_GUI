@@ -20,14 +20,13 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal"
-					Background="White">
+		<DockPanel Grid.Row="0" Grid.ColumnSpan="2" Background="White">
 			<Image Width="150" Height="60" Source="/Assets/choose_game.png"/>
 			<StackPanel Margin="9,7,0,0">
 				<TextBlock Classes="littleHeader">Выбор игры</TextBlock>
 				<TextBlock Classes="normal littleSubHeader">Выберите игру для установки русификатора.</TextBlock>
 			</StackPanel>
-		</StackPanel>
+		</DockPanel>
 		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
 
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
