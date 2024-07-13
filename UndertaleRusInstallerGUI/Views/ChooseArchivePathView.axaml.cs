@@ -29,7 +29,7 @@ namespace UndertaleRusInstallerGUI.Views
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    ChangeResultText("»з-за ограничений MacOS невозможно автоматически получить путь к архиву с данными русификатора," +
+                    ChangeResultText("»з-за ограничений MacOS невозможно автоматически получить путь к архиву с данными русификатора, " +
                                      "поэтому вам нужно выбрать его самосто€тельно.");
 
                     ZipIsValid = false;
