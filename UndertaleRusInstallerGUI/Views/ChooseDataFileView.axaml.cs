@@ -15,7 +15,7 @@ namespace UndertaleRusInstallerGUI.Views
     {
         private readonly MainWindow mainWindow;
         private GameType lastSelectedGame;
-        private bool cleanResultText = false;
+        private bool cleanResultText = true;
 
         public ChooseDataFileView() // For the designer preview
         {
@@ -41,8 +41,7 @@ namespace UndertaleRusInstallerGUI.Views
                         ChangeResultText("Файл данных Undertale найден.\n" +
                                          "Если вы хотите установить русификатор в другую копию Undertale, то выберите другой путь.");
 
-                    cleanResultText = false;
-                    ChangeDataPathText(dataPath);
+                    ChangeDataPathText(dataPath, false);
                 }
                 else
                 {
@@ -55,7 +54,12 @@ namespace UndertaleRusInstallerGUI.Views
                 }
             }
             else
+            {
+                cleanResultText = false;
                 DataPathBox_TextChanging(null, null);
+                cleanResultText = true;
+            }
+                
 
             lastSelectedGame = SelectedGame;
             DataPathHeader.Header = $"Путь файла данных {SelectedGame}";
@@ -98,11 +102,8 @@ namespace UndertaleRusInstallerGUI.Views
             bool nextButtonState = IsDataPathValid(DataPathBox.Text);
             mainWindow.ChangeNextButtonState(nextButtonState);
 
-            if (nextButtonState && cleanResultText)
+            if (cleanResultText)
                 ChangeResultText(null);
-
-            if (!cleanResultText)
-                cleanResultText = true;
         }
     }
 }

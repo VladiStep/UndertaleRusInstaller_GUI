@@ -54,6 +54,7 @@ namespace UndertaleRusInstallerGUI.Views
                 OnInstallError(scrEx.Message, false);
                 mainWindow.ScriptError("В процессе распаковки архива с данными возникла ошибка.\n" +
                                        "Текст ошибки смотрите в журнале загрузки.");
+                ZipIsValid = false;
                 return;
             }
             catch (Exception ex)
@@ -62,6 +63,7 @@ namespace UndertaleRusInstallerGUI.Views
                 OnInstallError($"В процессе распаковки архива с данными возникла ошибка:\n{ex}", false);
                 mainWindow.ScriptError("В процессе распаковки архива с данными возникла ошибка.\n" +
                                        "Текст ошибки смотрите в журнале загрузки.");
+                ZipIsValid = false;
                 return;
             }
 

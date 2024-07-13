@@ -11,7 +11,6 @@ namespace UndertaleRusInstallerGUI.Views
     public partial class ChooseArchivePathView : UserControl
     {
         private readonly MainWindow mainWindow;
-        private bool cleanResultText = false;
 
         public ChooseArchivePathView() // For the designer preview
         {
@@ -42,19 +41,30 @@ namespace UndertaleRusInstallerGUI.Views
                 ZipPath = Path.Combine(CurrDirPath, ZipName);
             }
 
-            FileStatus zipStatus = IsZipPathValid(ZipPath, false);
-            if (zipStatus == FileStatus.NotFound)
+            // Can be `false` only on an extraction error
+            if (!ZipIsValid)
             {
-                ChangeResultText("Архив с данными русификатора не найден, выберите путь вручную.");
-            }
-            else if (zipStatus == FileStatus.Empty)
-            {
-                ChangeResultText("Архив с данными русификатора пуст.\n" +
+                ChangeResultText("Архив с данными русификатора повреждён.\n" +
                                  "Попробуйте скачать/распаковать архив с установщиком заново, либо выберите другой путь.");
             }
             else
             {
-                ChangeResultText("Архив с данными русификатора найден, нажмите \"Далее\".");
+                FileStatus zipStatus = IsZipPathValid(ZipPath, false);
+                if (zipStatus == FileStatus.NotFound)
+                {
+                    ChangeResultText("Архив с данными русификатора не найден, выберите путь вручную.");
+                }
+                else if (zipStatus == FileStatus.Empty)
+                {
+                    ChangeResultText("Архив с данными русификатора пуст.\n" +
+                                     "Попробуйте скачать/распаковать архив с установщиком заново, либо выберите другой путь.");
+                }
+                else
+                {
+                    ChangeResultText("Архив с данными русификатора найден, нажмите \"Далее\".");
+                }
+
+                ChangeZipPathText(ZipPath, false);
             }
 
             mainWindow.ChangeNextButtonState(ZipIsValid);
@@ -97,11 +107,7 @@ namespace UndertaleRusInstallerGUI.Views
             _ = IsZipPathValid(ZipPathBox.Text); // Changes "ZipIsValid"
             mainWindow.ChangeNextButtonState(ZipIsValid);
 
-            if (ZipIsValid && cleanResultText)
-                ChangeResultText(null);
-
-            if (!cleanResultText)
-                cleanResultText = true;
+            ChangeResultText(null);
         }
     }
 }

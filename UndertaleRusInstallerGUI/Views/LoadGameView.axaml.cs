@@ -61,7 +61,7 @@ namespace UndertaleRusInstallerGUI.Views
                 bool ignore = mainWindow.ScriptQuestion("Кажется, что загруженная игра - это не Undertale v1.08 и не NXTale.\n" +
                                                         "Всё равно продолжить?");
                 if (!ignore)
-                    mainWindow.GoBack();
+                    mainWindow.GoBack(2); // Skip "ChooseArchivePathView"
                 else
                     mainWindow.GoForward();    
             }
@@ -69,7 +69,7 @@ namespace UndertaleRusInstallerGUI.Views
             {
                 mainWindow.ScriptError($"Загруженная игра - это не {SelectedGame}.\n" +
                                        "Выберите другой файл.");
-                mainWindow.GoBack();
+                mainWindow.GoBack(2); // Skip "ChooseArchivePathView"
                 return;
             }
             else

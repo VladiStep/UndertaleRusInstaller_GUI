@@ -100,7 +100,7 @@ public static class Core
 
     public static bool IsDataPathValid(string dataPath)
     {
-        return dataPath.Length >= 5 // "a.win"
+        return dataPath?.Length >= 5 // "a.win"
                && File.Exists(dataPath)
                && ValidDataExtensions.Any(x => dataPath.EndsWith(x));
     }

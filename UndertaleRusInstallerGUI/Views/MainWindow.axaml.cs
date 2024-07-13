@@ -50,18 +50,18 @@ public partial class MainWindow : Window
         CopyrightText.IsVisible = state;
         SeparatorRect.Margin = state ? copyrightMargin : default;
     }
-    public void GoBack()
+    public void GoBack(ushort amount = 1)
     {
         if (currPartIndex == 0)
             return;
 
-        currPartIndex--;
+        currPartIndex -= (short)amount;
         if (Parts[currPartIndex] is LoadGameView)
             currPartIndex--; // Skip "LoadGameView"
 
         RefreshCurrentPart();
     }
-    public void GoForward()
+    public void GoForward(ushort amount = 1)
     {
         if (NextButton.Classes.Contains("finish"))
         {
@@ -71,7 +71,7 @@ public partial class MainWindow : Window
 
         if (currPartIndex == lastPartIndex)
             return;
-        currPartIndex++;
+        currPartIndex += (short)amount;
 
         RefreshCurrentPart();
     }
