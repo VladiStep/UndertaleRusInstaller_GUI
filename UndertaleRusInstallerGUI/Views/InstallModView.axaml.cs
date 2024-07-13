@@ -50,7 +50,7 @@ namespace UndertaleRusInstallerGUI.Views
             }
             catch (ScriptException scrEx)
             {
-                mainWindow.ChangeBackButtonState(true);
+                mainWindow.ChangeBackButtonState(true, 3); // 3 = go straight to the archive path choosing stage
                 OnInstallError(scrEx.Message, false);
                 mainWindow.ScriptError("В процессе распаковки архива с данными возникла ошибка.\n" +
                                        "Текст ошибки смотрите в журнале загрузки.");
@@ -59,7 +59,7 @@ namespace UndertaleRusInstallerGUI.Views
             }
             catch (Exception ex)
             {
-                mainWindow.ChangeBackButtonState(true);
+                mainWindow.ChangeBackButtonState(true, 3); // 3 = go straight to the archive path choosing stage
                 OnInstallError($"В процессе распаковки архива с данными возникла ошибка:\n{ex}", false);
                 mainWindow.ScriptError("В процессе распаковки архива с данными возникла ошибка.\n" +
                                        "Текст ошибки смотрите в журнале загрузки.");

@@ -36,14 +36,20 @@ public partial class MainWindow : Window
     private short currPartIndex = 0;
     private readonly short lastPartIndex = -1;
     private readonly Thickness copyrightMargin = new(0, 0, 5, 0);
+    private ushort? tempGoBackAmount = null;
+    private ushort? tempGoNextAmount = null;
 
-    public void ChangeBackButtonState(bool state)
+    public void ChangeBackButtonState(bool state, ushort amount = 1)
     {
         BackButton.IsEnabled = state;
+        if (amount != 1)
+            tempGoBackAmount = amount;
     }
-    public void ChangeNextButtonState(bool state)
+    public void ChangeNextButtonState(bool state, ushort amount = 1)
     {
         NextButton.IsEnabled = state;
+        if (amount != 1)
+            tempGoNextAmount = amount;
     }
     public void ChangeCopyrightState(bool state)
     {
@@ -54,6 +60,12 @@ public partial class MainWindow : Window
     {
         if (currPartIndex == 0)
             return;
+
+        if (tempGoBackAmount is not null)
+        {
+            amount = (ushort)tempGoBackAmount;
+            tempGoBackAmount = null;
+        }
 
         currPartIndex -= (short)amount;
         if (Parts[currPartIndex] is LoadGameView)
@@ -71,6 +83,13 @@ public partial class MainWindow : Window
 
         if (currPartIndex == lastPartIndex)
             return;
+
+        if (tempGoNextAmount is not null)
+        {
+            amount = (ushort)tempGoNextAmount;
+            tempGoNextAmount = null;
+        }
+
         currPartIndex += (short)amount;
 
         RefreshCurrentPart();
