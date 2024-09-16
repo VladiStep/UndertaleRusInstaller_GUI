@@ -41,7 +41,9 @@ namespace UndertaleRusInstallerGUI.Views
                         ChangeResultText("Файл данных Undertale найден.\n" +
                                          "Если вы хотите установить русификатор в другую копию Undertale, то выберите другой путь.");
 
-                    ChangeDataPathText(dataPath, false);
+                    cleanResultText = false;
+                    ChangeDataPathText(dataPath);
+                    cleanResultText = true;
                 }
                 else
                 {
@@ -59,7 +61,6 @@ namespace UndertaleRusInstallerGUI.Views
                 DataPathBox_TextChanging(null, null);
                 cleanResultText = true;
             }
-                
 
             lastSelectedGame = SelectedGame;
             DataPathHeader.Header = $"Путь файла данных {SelectedGame}";
@@ -89,7 +90,10 @@ namespace UndertaleRusInstallerGUI.Views
             if (!triggerEvent)
                 DataPathBox.TextChanging -= DataPathBox_TextChanging;
 
-            DataPathBox.Text = text;
+            if (text == DataPathBox.Text)
+                DataPathBox_TextChanging(null, null);
+            else
+                DataPathBox.Text = text;
 
             if (!triggerEvent)
                 DataPathBox.TextChanging += DataPathBox_TextChanging;
