@@ -18,7 +18,7 @@ namespace UndertaleRusInstallerGUI.Views
     public partial class ConfirmInstallView : UserControl
     {
         private readonly MainWindow mainWindow;
-        public static bool AskNXTaleQuestion { get; set; }
+        public static bool AskXBOXTALEQuestion { get; set; }
 
         public ConfirmInstallView() // For the designer preview
         {
@@ -40,11 +40,11 @@ namespace UndertaleRusInstallerGUI.Views
 
             InstallInfoText.Inlines.Clear();
 
-            if (AskNXTaleQuestion && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (AskXBOXTALEQuestion && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                bool replace = mainWindow.ScriptQuestion("Внимание - вы выбрали NXTale будучи не на Windows, поэтому для запуска игры потребуется заменить её исполняемый файл.\n" +
+                bool replace = mainWindow.ScriptQuestion("Внимание - вы выбрали XBOXTALE будучи не на Windows, поэтому для запуска игры потребуется заменить её исполняемый файл.\n" +
                                                          "Заменять его?\n(если у вас уже стоит нужный, то можно отменить замену)");
-                ReplaceNXTaleExe = replace;
+                ReplaceXBOXTALEExe = replace;
 
                 if (replace)
                     BackupText.Text = "Перед установкой будет сделана резервная копия двух нижеуказанных файлов игры.";
@@ -64,9 +64,9 @@ namespace UndertaleRusInstallerGUI.Views
             };
             InstallInfoText.Inlines.AddRange(runs);
 
-            if (ReplaceNXTaleExe && File.Exists(NXTaleExePath))
+            if (ReplaceXBOXTALEExe && File.Exists(XBOXTALEExePath))
             {
-                Run run = new($"\nПуть заменяемого исполняемого файла игры:\n\t{NXTaleExePath}\n");
+                Run run = new($"\nПуть заменяемого исполняемого файла игры:\n\t{XBOXTALEExePath}\n");
                 InstallInfoText.Inlines.Add(run);
             }
         }

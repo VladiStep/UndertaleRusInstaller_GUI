@@ -66,7 +66,7 @@ class Program
                 targetSiteStr = targetSiteStr.Insert(inIndex, "\n  ");
             string msg = $"Ошибка - {ex.Message}\n{targetSiteStr}";
             
-            MessageBox("Установщик русификатора Undertale/NXTale", msg, "ok", "error", 0);
+            MessageBox("Установщик русификатора Undertale/XBOXTALE", msg, "ok", "error", 0);
         }
         else
         {
@@ -77,7 +77,7 @@ class Program
             }
             catch { }
 
-            MessageBox("Установщик русификатора Undertale/NXTale", msg, "ok", "error", 0);
+            MessageBox("Установщик русификатора Undertale/XBOXTALE", msg, "ok", "error", 0);
         }
     }
 

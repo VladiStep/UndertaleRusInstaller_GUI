@@ -34,7 +34,7 @@
 			<RadioButton GroupName="Game" Click="UTRadioButton_Click">Undertale</RadioButton>
 			<RadioButton GroupName="Game" Click="NXTRadioButton_Click">
 				<TextBlock>
-					NXTale <Run Classes="footnote">(мод для Undertale)</Run>
+					XBOXTALE <Run Classes="footnote">(мод для Undertale)</Run>
 				</TextBlock>
 			</RadioButton>
 		</StackPanel>

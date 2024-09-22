@@ -14,7 +14,7 @@ namespace UndertaleRusInstallerGUI.Views;
 
 public partial class MainWindow
 {
-    private const string msgBoxTitle = "Установщик русификатора Undertale/NXTale";
+    private const string msgBoxTitle = "Установщик русификатора Undertale/XBOXTALE";
 
     public void ScriptMessage(string message) => MessageBox(msgBoxTitle, message, "ok", "info", 1);
     public void ScriptError(string error, string title = msgBoxTitle) => MessageBox(title, error, "ok", "error", 1);

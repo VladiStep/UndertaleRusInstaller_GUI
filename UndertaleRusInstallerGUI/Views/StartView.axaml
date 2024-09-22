@@ -35,14 +35,14 @@
 
         <StackPanel Grid.Column="1" Margin="16">
             <TextBlock Classes="header">
-                Вас приветствует установщик русификатора Undertale/NXTale
+                Вас приветствует установщик русификатора Undertale/XBOXTALE
             </TextBlock>
             <TextBlock Classes="normal">
-                Эта программа предназначена для установки русификатора Undertale и мода NXTale.<LineBreak/>
+                Эта программа предназначена для установки русификатора Undertale и мода XBOXTALE.<LineBreak/>
                 <LineBreak/>
-                Если вы хотите установить локализацию для мода NXTale, убедитесь, что вы установили модификацию на сайте<LineBreak/>
+                Если вы хотите установить локализацию для мода XBOXTALE, убедитесь, что вы установили модификацию на сайте<LineBreak/>
                 <Button Classes="link" Click="NXTLinkButton_Click"
-                        PointerPressed="NXTLinkButton_PointerPressed">https://gamejolt.com/games/nxtale/636375</Button><LineBreak/>
+                        PointerPressed="NXTLinkButton_PointerPressed">https://gamejolt.com/games/XBOXTALE/636375</Button><LineBreak/>
                 <LineBreak/>
                 Нажмите Далее, чтобы продолжить.
             </TextBlock>
