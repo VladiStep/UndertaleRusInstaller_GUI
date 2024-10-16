@@ -5,10 +5,9 @@
 	
 	<CompanyName>VladStepu2001</CompanyName>
 	<Copyright>Copyright © 2024</Copyright>
-	<AssemblyVersion>1.0.3</AssemblyVersion>
-	<FileVersion>1.0.3</FileVersion>
 	<Version>1.0.3</Version>
-	<Product>Установщик русификатора Undertale/NXTale</Product>
+	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	<Product>Установщик русификатора Undertale/XBOXTALE</Product>
 	<AssemblyTitle>UndertaleRusInstallerGUI</AssemblyTitle>
   </PropertyGroup>
 </Project>

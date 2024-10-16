@@ -58,7 +58,7 @@ namespace UndertaleRusInstallerGUI.Views
             GameType gameType = CheckSelectedDataFile();
             if (gameType == GameType.None)
             {
-                bool ignore = mainWindow.ScriptQuestion("Кажется, что загруженная игра - это не Undertale v1.08 и не NXTale.\n" +
+                bool ignore = mainWindow.ScriptQuestion("Кажется, что загруженная игра - это не Undertale v1.08 и не XBOXTALE.\n" +
                                                         "Всё равно продолжить?");
                 if (!ignore)
                     mainWindow.GoBack(2); // Skip "ChooseArchivePathView"

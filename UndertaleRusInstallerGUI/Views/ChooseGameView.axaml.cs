@@ -42,14 +42,14 @@ namespace UndertaleRusInstallerGUI.Views
             OnGameSelected();
 
             Core.SelectedGame = Core.GameType.Undertale;
-            ConfirmInstallView.AskNXTaleQuestion = false;
+            ConfirmInstallView.AskXBOXTALEQuestion = false;
         }
         private void NXTRadioButton_Click(object sender, RoutedEventArgs e)
         {
             OnGameSelected();
 
-            Core.SelectedGame = Core.GameType.NXTale;
-            ConfirmInstallView.AskNXTaleQuestion = true;
+            Core.SelectedGame = Core.GameType.XBOXTALE;
+            ConfirmInstallView.AskXBOXTALEQuestion = true;
         }
     }
 }

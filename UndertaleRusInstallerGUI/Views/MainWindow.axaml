@@ -9,7 +9,7 @@
         Background="{StaticResource WinLightGrayBrush}"
         x:Class="UndertaleRusInstallerGUI.Views.MainWindow"
         Icon="/Assets/rus_heart.ico"
-        Title="Установка русификатора Undertale/NXTale"
+        Title="Установка русификатора Undertale/XBOXTALE"
 		Closing="Window_Closing"
 		DataContext="{Binding $self}">
     <Window.Styles>

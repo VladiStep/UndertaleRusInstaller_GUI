@@ -39,7 +39,7 @@
 		<Setter Property="Margin" Value="7,4,0,0"/>
 	</Style>
 	<Style Selector="TextBlock#CopyrightText">
-		<Setter Property="Text" Value="Русификатор UT/NXTale, 2024"/>
+		<Setter Property="Text" Value="Русификатор UT/XBOXTALE, 2024"/>
 		<Setter Property="FontSize" Value="11"/>
 		<Setter Property="Foreground" Value="{StaticResource WinGrayBrush}"/>
 		<Setter Property="Padding" Value="11,0,5,0"/>

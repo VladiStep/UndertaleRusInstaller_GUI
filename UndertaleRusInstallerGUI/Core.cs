@@ -25,7 +25,7 @@ public static class Core
     {
         None,
         Undertale,
-        NXTale
+        XBOXTALE
     }
     private enum BackupResult : ushort
     {
@@ -60,14 +60,14 @@ public static class Core
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
                                                             : new[] { ".win", ".ios", ".unx" };
-    private static readonly (string Path, string Name) nxtaleExePath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) // This won't be used on Windows
+    private static readonly (string Path, string Name) xboxtaleExePath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) // This won't be used on Windows
                                                                          ? ("runner", "runner") : ("Contents/MacOS/Mac_Runner", "Mac_Runner");
 
     public static GameType SelectedGame { get; set; }
     public static UndertaleData Data { get; set; }
     public static string DataPath { get; set; }
-    public static bool ReplaceNXTaleExe { get; set; }
-    public static string NXTaleExePath => gameDirLocation + nxtaleExePath.Path;
+    public static bool ReplaceXBOXTALEExe { get; set; }
+    public static string XBOXTALEExePath => gameDirLocation + xboxtaleExePath.Path;
 
     public static string ZipPath { get; set; }
     public static bool ZipIsValid { get; set; } = true; 
@@ -116,12 +116,12 @@ public static class Core
         {
             if (dataPath.EndsWith(".app/")) // Файл приложения MacOS 
             {
-                if (SelectedGame == GameType.NXTale)
+                if (SelectedGame == GameType.XBOXTALE)
                     gameDirLocation = dataPath;
                 dataPath += utMacFileLoc;
             }
         }
-        else if (SelectedGame == GameType.NXTale)
+        else if (SelectedGame == GameType.XBOXTALE)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -231,7 +231,7 @@ public static class Core
             if (Data.GameObjects.ByName("obj_mewmew_npc") is null)
                 return GameType.None;
             else
-                return GameType.NXTale;
+                return GameType.XBOXTALE;
         }
         else
         {
@@ -364,9 +364,9 @@ public static class Core
         {
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
-            if (SelectedGame == GameType.NXTale)
+            if (SelectedGame == GameType.XBOXTALE)
             {
-                if (!InstallToNXTalePart(msgDelegate, errorDelegate, warnDelegate))
+                if (!InstallToXBOXTALEPart(msgDelegate, errorDelegate, warnDelegate))
                     return false;
             }
 
@@ -739,11 +739,11 @@ public static class Core
 
         return res;
     }
-    private static bool InstallToNXTalePart(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
+    private static bool InstallToXBOXTALEPart(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (!ReplaceNXTaleExe)
+            if (!ReplaceXBOXTALEExe)
                 return true;
 
             BackupResult backupRes = MakeExecutableBackup(msgDelegate, errorDelegate, warnDelegate);
@@ -774,7 +774,7 @@ public static class Core
             return BackupResult.Error;
         }
 
-        string exePath = gameDirLocation + nxtaleExePath.Path;
+        string exePath = gameDirLocation + xboxtaleExePath.Path;
         if (!File.Exists(exePath))
         {
             warnDelegate("Внимание - не найден исполняемый файл игры.");
@@ -831,8 +831,8 @@ public static class Core
         else
             return true;
 
-        string exePath = gameDirLocation + nxtaleExePath.Path;
-        string srcExePath = Path.Combine(TempDirPath, "nxtale", nxtaleExePath.Name);
+        string exePath = gameDirLocation + xboxtaleExePath.Path;
+        string srcExePath = Path.Combine(TempDirPath, "XBOXTALE", xboxtaleExePath.Name);
         if (!File.Exists(srcExePath))
         {
             errorDelegate($"Ошибка - не найдена замена для исполняемого файла игры, путь - \"{srcExePath}\".");
