@@ -16,6 +16,9 @@ using System.Collections;
 using System.Drawing;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
+using InfoFlags = UndertaleModLib.Models.UndertaleGeneralInfo.InfoFlags;
+using FuncClassif = UndertaleModLib.Models.UndertaleGeneralInfo.FunctionClassification;
+using OptionsFlags = UndertaleModLib.Models.UndertaleOptions.OptionsFlags;
 
 namespace UndertaleRusInstallerGUI;
 
@@ -384,6 +387,7 @@ public static class Core
             if (!Directory.Exists(codeDir))
                 throw new ScriptException($"Ошибка - не найдена папка \"{codeDir}\".");
 
+            #region Game specific operations
             if (SelectedGame == GameType.Undertale)
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -406,6 +410,7 @@ public static class Core
                 if (!InstallToXBOXTALEPart(msgDelegate, errorDelegate, warnDelegate))
                     return false;
             }
+            #endregion
 
             #region Font import 
             msgDelegate("Замена шрифтов...", false);
@@ -782,6 +787,29 @@ public static class Core
                     return false;
             }
         }
+
+        // TODO: find out what flags are not necessary, and
+        // should it replace them only for MacOS full screen support?
+        #region Flags
+        Data.GeneralInfo.Info = InfoFlags.SyncVertex1 | InfoFlags.Scale | InfoFlags.ShowCursor | InfoFlags.ScreenKey
+                                | InfoFlags.SyncVertex3 | InfoFlags.StudioVersionB3;
+
+        Data.GeneralInfo.FunctionClassifications = FuncClassif.Joystick | FuncClassif.Gamepad | FuncClassif.Screengrab
+                                                   | FuncClassif.Math | FuncClassif.Action | FuncClassif.MatrixD3D
+                                                   | FuncClassif.DataStructures | FuncClassif.File | FuncClassif.INI
+                                                   | FuncClassif.Directory | FuncClassif.Encoding | FuncClassif.UIDialog
+                                                   | FuncClassif.MotionPlanning | FuncClassif.ShapeCollision | FuncClassif.Instance 
+                                                   | FuncClassif.Room | FuncClassif.Game | FuncClassif.Window | FuncClassif.DrawColor 
+                                                   | FuncClassif.Texture | FuncClassif.String | FuncClassif.Tiles
+                                                   | FuncClassif.Surface | FuncClassif.IO | FuncClassif.Variables 
+                                                   | FuncClassif.Array | FuncClassif.Date | FuncClassif.Sprite | FuncClassif.Audio 
+                                                   | FuncClassif.Event | FuncClassif.FreeType | FuncClassif.OS | FuncClassif.Console
+                                                   | FuncClassif.Buffer | FuncClassif.Steam;
+
+        Data.Options.Info = OptionsFlags.UseNewAudio | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey
+                            | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress
+                            | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
+        #endregion
 
         return true;
     }
