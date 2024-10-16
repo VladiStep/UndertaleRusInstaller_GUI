@@ -55,13 +55,17 @@ public static class Core
 
     public static readonly string CurrDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
     public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
-    public static readonly string ZipName = "ru_data.zip";
+    public const string ZipName = "ru_data.zip";
     private static string gameDirLocation;
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
                                                             : new[] { ".win", ".ios", ".unx" };
     private static readonly (string Path, string Name) xboxtaleExePath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) // This won't be used on Windows
                                                                          ? ("runner", "runner") : ("Contents/MacOS/Mac_Runner", "Mac_Runner");
+    private const string demonxWin = "demonx = \"...\"";
+    private const string demonxNonWin = "demonx = \"Part of this game's charm is the mystery of how many options or secrets there are. If you are reading this, " +
+                                        "please don't post this message or this information anywhere. Or doing secrets will become pointless.\"";
+    
 
     public static GameType SelectedGame { get; set; }
     public static UndertaleData Data { get; set; }
@@ -364,12 +368,6 @@ public static class Core
         {
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
-            if (SelectedGame == GameType.XBOXTALE)
-            {
-                if (!InstallToXBOXTALEPart(msgDelegate, errorDelegate, warnDelegate))
-                    return false;
-            }
-
             string packDir = TempDirPath + "Packager";
             string gamePrefix = SelectedGame.ToString().ToLowerInvariant();
             string srcGameDir = Path.Combine(TempDirPath, gamePrefix);
@@ -385,6 +383,29 @@ public static class Core
                 throw new ScriptException($"Ошибка - не найдена папка \"{spritesDir}\".");
             if (!Directory.Exists(codeDir))
                 throw new ScriptException($"Ошибка - не найдена папка \"{codeDir}\".");
+
+            if (SelectedGame == GameType.Undertale)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    try
+                    {
+                        string codePath = Path.Combine(codeDir, "gml_Script_scr_namingscreen_check.gml");
+                        string gmlText = File.ReadAllText(codePath);
+                        gmlText = gmlText.Replace(demonxNonWin, demonxWin);
+                        File.WriteAllText(codePath, gmlText);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"The \"demonx\" line replacement failed - {ex.Message}.");
+                    }
+                }
+            }
+            else if (SelectedGame == GameType.XBOXTALE)
+            {
+                if (!InstallToXBOXTALEPart(msgDelegate, errorDelegate, warnDelegate))
+                    return false;
+            }
 
             #region Font import 
             msgDelegate("Замена шрифтов...", false);
@@ -703,7 +724,7 @@ public static class Core
                 int lastIndexOfSep = file.LastIndexOf(Path.DirectorySeparatorChar);
                 try
                 {
-                    MainWindow.ImportGMLString(file.Substring(lastIndexOfSep + 1, file.IndexOf(".", lastIndexOfSep + 1) - lastIndexOfSep - 1), File.ReadAllText(file));
+                    MainWindow.ImportGMLString(Path.GetFileNameWithoutExtension(file), File.ReadAllText(file));
                 }
                 catch (Exception ex)
                 {
