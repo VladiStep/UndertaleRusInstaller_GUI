@@ -5,6 +5,7 @@
     <LangVersion>10</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>Assets\rus_heart.ico</ApplicationIcon>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
 
   

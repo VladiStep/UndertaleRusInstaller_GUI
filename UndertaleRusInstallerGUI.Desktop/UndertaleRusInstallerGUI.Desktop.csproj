@@ -8,6 +8,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UseAppHost>true</UseAppHost>
     <ApplicationIcon>rus_heart.ico</ApplicationIcon>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
