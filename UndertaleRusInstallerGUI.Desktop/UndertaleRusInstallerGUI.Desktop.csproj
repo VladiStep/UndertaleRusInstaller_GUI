@@ -9,6 +9,9 @@
     <UseAppHost>true</UseAppHost>
     <ApplicationIcon>rus_heart.ico</ApplicationIcon>
     <Platforms>x86</Platforms>
+	<NeutralLanguage>en</NeutralLanguage>
+	<ResourceLanguages>en</ResourceLanguages>
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
