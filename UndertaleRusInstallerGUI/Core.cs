@@ -81,7 +81,11 @@ public static class Core
 
     public static long GetFileSize(string path)
     {
-        return new FileInfo(path).Length;
+        FileInfo info = new(path);
+        if (info.LinkTarget is not null)
+            info = new(info.LinkTarget);
+
+        return info.Length;
     }
 
     public static FileStatus IsZipPathValid(string zipPath, bool checkName = true)
