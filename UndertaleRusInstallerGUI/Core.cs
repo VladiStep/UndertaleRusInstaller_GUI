@@ -206,7 +206,6 @@ public static class Core
 
     public static async Task<bool> LoadDataFile(WarningHandlerDelegate warnDelegate, MessageHandlerDelegate msgDelegate)
     {
-        List<string> warnings = new();
         UndertaleData data = null;
 
         bool res = await Task.Run(() =>
