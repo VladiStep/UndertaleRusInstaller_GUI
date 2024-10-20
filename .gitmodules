@@ -1,4 +1,4 @@
 [submodule "UndertaleModTool"]
 	path = UndertaleModTool
-	url = https://github.com/UnderminersTeam/UndertaleModTool
-	branch = stable-0.6
+	url = https://github.com/VladiStep/UndertaleModTool
+	branch = undertaleRusInstaller
