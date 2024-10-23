@@ -404,7 +404,7 @@ public static class Core
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"The \"demonx\" line replacement failed - {ex.Message}.");
+                        warnDelegate($"Не удалось заменить строку с \"demonx\" - {ex.Message}.");
                     }
                 }
             }
