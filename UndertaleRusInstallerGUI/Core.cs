@@ -58,8 +58,9 @@ public static class Core
 
     public static readonly string CurrDirPath = Path.GetDirectoryName(Environment.ProcessPath) + Path.DirectorySeparatorChar;
     public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
+    public static readonly string NewDataDirPath = Path.Combine(TempDirPath, "data") + Path.DirectorySeparatorChar;
     public const string ZipName = "ru_data.zip";
-    private static string gameDirLocation;
+    private static string gameDirLocation, gamePrefix;
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
                                                             : new[] { ".win", ".ios", ".unx" };
@@ -68,9 +69,17 @@ public static class Core
     private const string demonxWin = "demonx = \"...\"";
     private const string demonxNonWin = "demonx = \"Part of this game's charm is the mystery of how many options or secrets there are. If you are reading this, " +
                                         "please don't post this message or this information anywhere. Or doing secrets will become pointless.\"";
-    
 
-    public static GameType SelectedGame { get; set; }
+    private static GameType _selectedGame;
+    public static GameType SelectedGame
+    {
+        get => _selectedGame;
+        set
+        {
+            _selectedGame = value;
+            gamePrefix = value.ToString().ToLowerInvariant();
+        }
+    }
     public static UndertaleData Data { get; set; }
     public static string DataPath { get; set; }
     public static bool ReplaceXBOXTALEExe { get; set; }
@@ -86,6 +95,36 @@ public static class Core
             info = new(info.LinkTarget);
 
         return info.Length;
+    }
+
+    // Thanks, ChatGPT-4o.
+    public static void ExtractOneDirectory(this ZipArchive zipArchive, string directoryName, string destDirPath,
+                                           bool overwriteFiles = true)
+    {
+        if (!directoryName.EndsWith('/'))
+            directoryName += '/';
+
+        if (!Directory.Exists(destDirPath))
+            Directory.CreateDirectory(destDirPath);
+
+        bool found = false;
+        foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName)))
+        {
+            string relPath = entry.FullName[directoryName.Length..];
+
+            if (String.IsNullOrEmpty(relPath))
+                continue;
+
+            string destPath = Path.Combine(destDirPath, relPath);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+            entry.ExtractToFile(destPath, overwrite: overwriteFiles);
+
+            found = true;
+        }
+
+        if (!found)
+            throw new DirectoryNotFoundException($"В архиве нет папки \"{directoryName}\".");
     }
 
     public static FileStatus IsZipPathValid(string zipPath, bool checkName = true)
@@ -352,7 +391,10 @@ public static class Core
         await Task.Run(() =>
         {
             msgDelegate("Распаковка архива с данными...", false);
-            ZipFile.ExtractToDirectory(ZipPath, TempDirPath, true);
+
+            using ZipArchive archive = ZipFile.OpenRead(ZipPath);
+            archive.ExtractOneDirectory("common", NewDataDirPath);
+            archive.ExtractOneDirectory(gamePrefix, NewDataDirPath);
         });
     }
     public static async Task DeleteTempData(Action<string, bool> msgDelegate)
@@ -375,14 +417,12 @@ public static class Core
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
             string packDir = TempDirPath + "Packager";
-            string gamePrefix = SelectedGame.ToString().ToLowerInvariant();
-            string srcGameDir = Path.Combine(TempDirPath, gamePrefix);
-            if (!Directory.Exists(srcGameDir))
-                throw new ScriptException($"Ошибка - не найдена папка \"{srcGameDir}\".");
+            if (!Directory.Exists(NewDataDirPath))
+                throw new ScriptException($"Ошибка - не найдена папка \"{NewDataDirPath}\".");
 
-            string fontsDir = Path.Combine(TempDirPath, gamePrefix, "ru_fonts") + Path.DirectorySeparatorChar;
-            string spritesDir = Path.Combine(TempDirPath, gamePrefix, "ru_sprites") + Path.DirectorySeparatorChar;
-            string codeDir = Path.Combine(TempDirPath, gamePrefix, "code") + Path.DirectorySeparatorChar;
+            string fontsDir = Path.Combine(NewDataDirPath, "ru_fonts") + Path.DirectorySeparatorChar;
+            string spritesDir = Path.Combine(NewDataDirPath, "ru_sprites") + Path.DirectorySeparatorChar;
+            string codeDir = Path.Combine(NewDataDirPath, "code") + Path.DirectorySeparatorChar;
             if (!Directory.Exists(fontsDir))
                 throw new ScriptException($"Ошибка - не найдена папка \"{fontsDir}\".");
             if (!Directory.Exists(spritesDir))
@@ -884,7 +924,7 @@ public static class Core
             return true;
 
         string exePath = gameDirLocation + xboxtaleExePath.Path;
-        string srcExePath = Path.Combine(TempDirPath, "XBOXTALE", xboxtaleExePath.Name);
+        string srcExePath = Path.Combine(NewDataDirPath, xboxtaleExePath.Name);
         if (!File.Exists(srcExePath))
         {
             errorDelegate($"Ошибка - не найдена замена для исполняемого файла игры, путь - \"{srcExePath}\".");
