@@ -25,6 +25,9 @@ namespace UndertaleRusInstallerGUI.Views
 
         private void UserControl_AttachedToVisualTree(object sender, VisualTreeAttachmentEventArgs e)
         {
+            if (mainWindow is null)
+                return;
+
             if (ZipPath is null)
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
