@@ -110,15 +110,16 @@ public static class Core
         bool found = false;
         foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName)))
         {
-            string relPath = entry.FullName[directoryName.Length..];
-
-            if (String.IsNullOrEmpty(relPath))
+            if (entry.FullName == directoryName)
                 continue;
 
+            string relPath = entry.FullName[directoryName.Length..];
             string destPath = Path.Combine(destDirPath, relPath);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-            entry.ExtractToFile(destPath, overwrite: overwriteFiles);
+            if (relPath.EndsWith('/'))
+                Directory.CreateDirectory(destPath);
+            else
+                entry.ExtractToFile(destPath, overwrite: overwriteFiles);
 
             found = true;
         }
