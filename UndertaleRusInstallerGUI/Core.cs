@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using InfoFlags = UndertaleModLib.Models.UndertaleGeneralInfo.InfoFlags;
 using FuncClassif = UndertaleModLib.Models.UndertaleGeneralInfo.FunctionClassification;
 using OptionsFlags = UndertaleModLib.Models.UndertaleOptions.OptionsFlags;
+using System.Collections.Immutable;
 
 namespace UndertaleRusInstallerGUI;
 
@@ -95,6 +96,14 @@ public static class Core
             info = new(info.LinkTarget);
 
         return info.Length;
+    }
+
+    public static IEnumerable<T> ReverseList<T>(this IList<T> list)
+    {
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            yield return list[i];
+        }
     }
 
     // Thanks, ChatGPT-4o.
@@ -308,27 +317,78 @@ public static class Core
         return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
     }
 
-    public static List<UndertaleEmbeddedTexture> GetRussianTexturePages()
+    // null = not all texture pages were deleted
+    // true = all were deleted
+    // false = no Russian textures were found
+    public static bool? DeleteOldRussianTexturePages(Action<string> warnDelegate)
     {
         if (Data.EmbeddedTextures.Count < 4)
-            return null;
+            return false;
 
-        List<UndertaleEmbeddedTexture> ruTextures = new();
-        int skipAmount = (SelectedGame == GameType.Undertale) ? 20 : 35;
-        var embedTextures = Data.EmbeddedTextures.Skip(skipAmount).Reverse();
+        bool? CompareAndDeleteItems(HashSet<UndertaleTexturePageItem> remainingItems)
+        {
+            var remainingItemsArr = remainingItems.ToArray();
+            int i = remainingItems.Count - 1;
+            int lastRemItemIndex = Data.TexturePageItems.IndexOf(remainingItemsArr[i]);
+            if (lastRemItemIndex == -1)
+            {
+                warnDelegate($"\"{nameof(CompareAndDeleteItems)}()\" - lastRemItemIndex == -1?");
+                return null;
+            }
+
+            // I wanted to limit `textPageItems` to the `embedSkipAmount`, but I gave up
+            int removeCount = Data.TexturePageItems.Count - lastRemItemIndex - 1;
+            var textPageItems = Data.TexturePageItems.ReverseList().Skip(removeCount);
+
+            // Check if there is no unmatched page items in the end
+            // or in between the embed. textures
+            foreach (var srcItem in textPageItems)
+            {
+                if (i < 0)
+                {
+                    warnDelegate($"\"{nameof(CompareAndDeleteItems)}()\" - i < 0?");
+                    return null;
+                }
+
+                if (srcItem != remainingItemsArr[i--])
+                    return false;
+            }
+
+            for (i = 0; i < removeCount; i++)
+                Data.TexturePageItems.RemoveAt(Data.TexturePageItems.Count - 1);
+
+            return true;
+        }
+
+        int embedSkipAmount = (SelectedGame == GameType.Undertale) ? 20 : 35;
+        int embedTakeAmount = Data.EmbeddedTextures.Count - embedSkipAmount;
+        var embedTextures = Data.EmbeddedTextures.ReverseList().Take(embedTakeAmount);
         var notJaFonts = Data.Fonts.Where(x => !x.Name.Content.StartsWith("fnt_ja", StringComparison.InvariantCulture))
                                    .ToHashSet();
         var pageItems = Data.TexturePageItems.ToHashSet();
+        ImmutableDictionary<UndertaleTexturePageItem, int> pageItemsIndexDict = null;
+        byte deletedUsedRuTextures = 0;
 
         foreach (var texture in embedTextures)
         {
             int matchingItemsCount = 0;
             int totalItemsCount = 0;
+
             foreach (var item in pageItems.Where(x => x.TexturePage == texture))
             {
                 var sprite = Data.Sprites.FirstOrDefault(s => s.Textures.Any(x => x.Texture == item));
                 if (sprite?.Name?.Content is null)
                 {
+                    // Deleted all the texture page items that were used
+                    if (deletedUsedRuTextures == 2)
+                    {
+                        matchingItemsCount++;
+                        totalItemsCount++;
+                        pageItems.Remove(item);
+
+                        continue;
+                    }
+
                     foreach (var font in notJaFonts)
                     {
                         if (font.Texture == item)
@@ -336,8 +396,12 @@ public static class Core
                             notJaFonts.Remove(font);
 
                             if (font.Glyphs.Any(g => g.Character == 'А')) // Cyrillic
+                            {
                                 matchingItemsCount++;
+                                pageItems.Remove(item);
+                            }
                             totalItemsCount++;
+
                             continue;
                         }
                     }
@@ -349,23 +413,36 @@ public static class Core
                     matchingItemsCount++;
                 totalItemsCount++;
 
-                if (sprite.Textures.Count > 1)
-                {
-                    // Remove other sprite frames, so it
-                    // won't check the each frame of the same sprite again.
-                    // Though, it also removes this frame.
-                    foreach (var frame in sprite.Textures)
-                        pageItems.Remove(frame.Texture);
-                }
+                // Remove other sprite frames, so it
+                // won't check the each frame of the same sprite again.
+                // Though, it also removes this frame.
+                foreach (var frame in sprite.Textures)
+                    pageItems.Remove(frame.Texture);
             }
 
             if (matchingItemsCount == totalItemsCount)
-                ruTextures.Add(texture);
-            else if (ruTextures.Count > 0)
+            {
+                pageItemsIndexDict ??= Data.TexturePageItems.Zip(Enumerable.Range(0, Data.TexturePageItems.Count))
+                                                            .ToImmutableDictionary(x => x.First, x => x.Second);
+
+                bool? res = CompareAndDeleteItems(pageItems);
+                if (res != true)
+                    return res;
+
+                Data.EmbeddedTextures.RemoveAt(Data.EmbeddedTextures.Count - 1);
+
+                if (deletedUsedRuTextures < 2)
+                    deletedUsedRuTextures++;
+            }
+            else
+            {
                 break;
+            }
         }
 
-        return ruTextures;
+        // If it's 3+ installation (there are 4+ RU textures), then we can't decide
+        // whether all unused textures are the Russian ones, but this should be sufficient.
+        return notJaFonts.Count == 0;
     }
 
     //                                            msgDelegate(text, setStatus)
@@ -452,7 +529,16 @@ public static class Core
     {
         bool res = await Task.Run(() =>
         {
-            var pages = GetRussianTexturePages();
+            bool? deletedOldRusTextures = DeleteOldRussianTexturePages(warnDelegate);
+            if (deletedOldRusTextures is bool res)
+            {
+                if (res)
+                    msgDelegate("Обнаружены и успешно удалены предыдущие установленные текстуры русификатора.", false);
+            }
+            else
+            {
+                warnDelegate("Внимание - обнаружены предыдущие установленные текстуры русификатора, но не удалось удалить их все.");
+            }
 
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
