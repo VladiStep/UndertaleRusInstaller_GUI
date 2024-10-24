@@ -108,7 +108,7 @@ public static class Core
             Directory.CreateDirectory(destDirPath);
 
         bool found = false;
-        foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName)))
+        foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName, StringComparison.InvariantCulture)))
         {
             if (entry.FullName == directoryName)
                 continue;
@@ -131,10 +131,15 @@ public static class Core
     public static FileStatus IsZipPathValid(string zipPath, bool checkName = true)
     {
         FileStatus res = FileStatus.OK;
-        if ((checkName && !zipPath.EndsWith(ZipName)) || !File.Exists(zipPath))
+        if ((checkName && !zipPath.EndsWith(ZipName, StringComparison.InvariantCulture))
+            || !File.Exists(zipPath))
+        {
             res = FileStatus.NotFound;
+        }
         else if (GetFileSize(zipPath) == 0)
+        {
             res = FileStatus.Empty;
+        }
 
         ZipIsValid = (res == FileStatus.OK);
 
@@ -153,7 +158,7 @@ public static class Core
     {
         return dataPath?.Length >= 5 // "a.win"
                && File.Exists(dataPath)
-               && ValidDataExtensions.Any(x => dataPath.EndsWith(x));
+               && ValidDataExtensions.Any(x => dataPath.EndsWith(x, StringComparison.InvariantCulture));
     }
     public static string ChooseDataPath()
     {
@@ -165,7 +170,7 @@ public static class Core
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            if (dataPath.EndsWith(".app/")) // Файл приложения MacOS 
+            if (dataPath.EndsWith(".app/", StringComparison.InvariantCulture)) // Файл приложения MacOS 
             {
                 if (SelectedGame == GameType.XBOXTALE)
                     gameDirLocation = dataPath;
@@ -308,24 +313,56 @@ public static class Core
         if (Data.EmbeddedTextures.Count < 4)
             return null;
 
-        List<UndertaleEmbeddedTexture> ruTextures = new(2);
-        foreach (var texture in Data.EmbeddedTextures.TakeLast(2))
+        List<UndertaleEmbeddedTexture> ruTextures = new();
+        int skipAmount = (SelectedGame == GameType.Undertale) ? 20 : 35;
+        var embedTextures = Data.EmbeddedTextures.Skip(skipAmount).Reverse();
+        var notJaFonts = Data.Fonts.Where(x => !x.Name.Content.StartsWith("fnt_ja", StringComparison.InvariantCulture))
+                                   .ToHashSet();
+        var pageItems = Data.TexturePageItems.ToHashSet();
+
+        foreach (var texture in embedTextures)
         {
-            int matchingSprCount = 0;
-            int totalSprCount = 0;
-            foreach (var item in Data.TexturePageItems.Where(x => x.TexturePage == texture))
+            int matchingItemsCount = 0;
+            int totalItemsCount = 0;
+            foreach (var item in pageItems.Where(x => x.TexturePage == texture))
             {
                 var sprite = Data.Sprites.FirstOrDefault(s => s.Textures.Any(x => x.Texture == item));
                 if (sprite?.Name?.Content is null)
-                    continue;
+                {
+                    foreach (var font in notJaFonts)
+                    {
+                        if (font.Texture == item)
+                        {
+                            notJaFonts.Remove(font);
 
-                if (sprite.Name.Content.EndsWith("_ru"))
-                    matchingSprCount++;
-                totalSprCount++;
+                            if (font.Glyphs.Any(g => g.Character == 'А')) // Cyrillic
+                                matchingItemsCount++;
+                            totalItemsCount++;
+                            continue;
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (sprite.Name.Content.EndsWith("_ru", StringComparison.InvariantCulture))
+                    matchingItemsCount++;
+                totalItemsCount++;
+
+                if (sprite.Textures.Count > 1)
+                {
+                    // Remove other sprite frames, so it
+                    // won't check the each frame of the same sprite again.
+                    // Though, it also removes this frame.
+                    foreach (var frame in sprite.Textures)
+                        pageItems.Remove(frame.Texture);
+                }
             }
 
-            if (matchingSprCount / (double)totalSprCount >= 0.9)
+            if (matchingItemsCount == totalItemsCount)
                 ruTextures.Add(texture);
+            else if (ruTextures.Count > 0)
+                break;
         }
 
         return ruTextures;
@@ -415,6 +452,8 @@ public static class Core
     {
         bool res = await Task.Run(() =>
         {
+            var pages = GetRussianTexturePages();
+
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
             string packDir = TempDirPath + "Packager";
