@@ -352,8 +352,12 @@ public static class Core
                     return null;
                 }
 
-                if (srcItem != remainingItemsArr[i--])
-                    return false;
+                var item = remainingItemsArr[i--];
+                if (srcItem != item)
+                {
+                    warnDelegate($"\"{nameof(CompareAndDeleteItems)}()\" - {srcItem.Name} != {item.Name}.");
+                    return null;
+                }
             }
 
             for (i = 0; i < removeCount; i++)
@@ -540,7 +544,7 @@ public static class Core
             {
                 warnDelegate("Внимание - обнаружены предыдущие установленные текстуры русификатора, но не удалось удалить их все.");
             }
-
+            
             MainWindow.ImportGMLString("gml_Script_textdata_ru", "");
 
             string packDir = TempDirPath + "Packager";
