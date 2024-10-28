@@ -528,6 +528,20 @@ public static class Core
             Directory.Delete(TempDirPath, true);
         });
     }
+    
+    private static string TranslateSavingMessage(string line)
+    {
+        if (line.StartsWith("Writing chunk", StringComparison.InvariantCulture))
+            return "Запись блока данных " + line[^4..];
+        else if (line == "Writing object references...")
+            return "Запись ссылок ресурсов...";
+        else if (line == "Clearing temporary dictionaries...")
+            return "Очистка временных словарей...";
+        else if (line == "Flushing remaining file buffer data to disk...")
+            return "Сброс оставшихся в буфере данных файла на диск...";
+        else
+            return line;
+    }
     public static async Task<bool> InstallMod(MsgDelegate msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate,
                                               Action<string> statusMsgDeleg, Action<double> statusMaxDeleg,
                                               Action valueIncrDeleg)
@@ -914,11 +928,12 @@ public static class Core
 
             #region Saving the game data file
             msgDelegate("Сохранение файла игровых данных...", true);
+            statusMaxDeleg(0);
             string tempFilePath = DataPath + "temp";
             try
             {
                 using (var stream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
-                    UndertaleIO.Write(stream, Data);
+                    UndertaleIO.Write(stream, Data, (msg) => statusMsgDeleg(TranslateSavingMessage(msg)));
 
                 if (File.Exists(DataPath))
                     File.Delete(DataPath);

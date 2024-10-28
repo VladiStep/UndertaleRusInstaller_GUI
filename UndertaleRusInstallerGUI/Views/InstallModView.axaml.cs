@@ -79,8 +79,7 @@ namespace UndertaleRusInstallerGUI.Views
             try
             {
                 installed = await InstallMod(OnInstallMessage, (text) => OnInstallError(text, false), OnInstallWarning,
-                                             SetProgressStatus, (max) => { SetupProgress(0, max); },
-                                             IncrementProgressValue);
+                                             SetProgressStatus, (max) => SetupProgress(0, max), IncrementProgressValue);
             }
             catch (ScriptException scrEx)
             {
@@ -196,7 +195,8 @@ namespace UndertaleRusInstallerGUI.Views
             Dispatcher.UIThread.Invoke(() =>
             {
                 InstallProgressText.Text = text;
-                InstallProgressValText.Text = $"{InstallProgressBar.Value}/{InstallProgressBar.Maximum}";
+                if (!InstallProgressBar.IsIndeterminate)
+                    InstallProgressValText.Text = $"{InstallProgressBar.Value}/{InstallProgressBar.Maximum}";
             }, DispatcherPriority.Render);
         }
         private void SetupProgress(double value, double max)
