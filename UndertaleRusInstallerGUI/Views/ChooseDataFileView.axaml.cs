@@ -68,6 +68,7 @@ namespace UndertaleRusInstallerGUI.Views
         private void UserControl_DetachedFromVisualTree(object sender, VisualTreeAttachmentEventArgs e)
         {
             DataPath = DataPathBox.Text;
+            ZipIsValid = true;
         }
 
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
