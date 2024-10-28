@@ -44,6 +44,8 @@ public static class Core
         OK
     }
 
+    public delegate void MsgDelegate(string text, bool setStatus);
+
     public static MainWindow MainWindow { get; set; }
 
     private const string utWinLocation = "{0}Program Files{1}\\Steam\\steamapps\\common\\Undertale\\";
@@ -445,8 +447,7 @@ public static class Core
         return notJaFonts.Count == 0;
     }
 
-    //                                            msgDelegate(text, setStatus)
-    public static async Task<bool> MakeDataBackup(Action<string, bool> msgDelegate, Action<string> errorDelegate)
+    public static async Task<bool> MakeDataBackup(MsgDelegate msgDelegate, Action<string> errorDelegate)
     {
         bool res = await Task.Run(() =>
         {
@@ -498,7 +499,7 @@ public static class Core
         return res;
     }
 
-    public static async Task ExtractNewData(Action<string, bool> msgDelegate)
+    public static async Task ExtractNewData(MsgDelegate msgDelegate)
     {
         if (!File.Exists(ZipPath))
             throw new ScriptException($"Ошибка - не найден архив с данными \"{ZipPath}\".");
@@ -512,7 +513,7 @@ public static class Core
             archive.ExtractOneDirectory(gamePrefix, NewDataDirPath);
         });
     }
-    public static async Task DeleteTempData(Action<string, bool> msgDelegate)
+    public static async Task DeleteTempData(MsgDelegate msgDelegate)
     {
         if (!Directory.Exists(TempDirPath))
             return;
@@ -523,7 +524,7 @@ public static class Core
             Directory.Delete(TempDirPath, true);
         });
     }
-    public static async Task<bool> InstallMod(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate,
+    public static async Task<bool> InstallMod(MsgDelegate msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate,
                                               Action<string> statusMsgDeleg, Action<double> statusMaxDeleg,
                                               Action valueIncrDeleg)
     {
@@ -934,7 +935,7 @@ public static class Core
 
         return res;
     }
-    private static bool InstallToXBOXTALEPart(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
+    private static bool InstallToXBOXTALEPart(MsgDelegate msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -982,7 +983,7 @@ public static class Core
 
         return true;
     }
-    private static BackupResult MakeExecutableBackup(Action<string, bool> msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
+    private static BackupResult MakeExecutableBackup(MsgDelegate msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
     {
         msgDelegate("Создание резервной копии исполняемого файла игры...", true);
 
@@ -1040,7 +1041,7 @@ public static class Core
 
         return BackupResult.Success;
     }
-    private static bool ReplaceExecutable(BackupResult backupRes, Action<string, bool> msgDelegate, Action<string> errorDelegate)
+    private static bool ReplaceExecutable(BackupResult backupRes, MsgDelegate msgDelegate, Action<string> errorDelegate)
     {
         if (backupRes == BackupResult.Success)
             msgDelegate("Замена исполняемого файла игры...", true);
