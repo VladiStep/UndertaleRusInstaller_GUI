@@ -51,7 +51,10 @@ public static class Core
     private const string utWinLocation = "{0}Program Files{1}\\Steam\\steamapps\\common\\Undertale\\";
     private const string utMacLocation = "{0}/Library/Application Support/Steam/steamapps/common/Undertale/UNDERTALE.app/";
     private static readonly string[] utLinuxLocations = { "{0}/.steam/steam/steamapps/common/Undertale/", "{0}/.local/share/steam/steamapps/common/Undertale/",
-                                                          "{0}/.steam/Steam/steamapps/common/Undertale/", "{0}/.local/share/Steam/steamapps/common/Undertale/" };
+                                                          "{0}/.steam/Steam/steamapps/common/Undertale/", "{0}/.local/share/Steam/steamapps/common/Undertale/",
+                                                          "{0}/.steam/debian-installation/steamapps/common/Undertale/",
+                                                          "{0}/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Undertale/",
+                                                          "{0}/.var/app/com.valvesoftware.Steam/.local/share/steam/steamapps/common/Undertale/"};
     private const string utWinFileLoc = "data.win";
     private const string utMacFileLoc = "Contents/Resources/game.ios";
     private const string utLinuxFileLoc = "assets/game.unx";
@@ -72,6 +75,9 @@ public static class Core
     private const string demonxWin = "demonx = \"...\"";
     private const string demonxNonWin = "demonx = \"Part of this game's charm is the mystery of how many options or secrets there are. If you are reading this, " +
                                         "please don't post this message or this information anywhere. Or doing secrets will become pointless.\"";
+
+    private static readonly string escapedDirSepChar = $"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}";
+    private static readonly Regex numberRegex = new(escapedDirSepChar + "(\\d+)$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static GameType _selectedGame;
     public static GameType SelectedGame
@@ -453,41 +459,45 @@ public static class Core
 
     public static async Task<bool> MakeDataBackup(MsgDelegate msgDelegate, Action<string> errorDelegate)
     {
+        static int? TryGetNumber(string str)
+        {
+            if (Int32.TryParse(str, out int res))
+                return res;
+
+            return null;
+        }
+
         bool res = await Task.Run(() =>
         {
+            msgDelegate($"Создание резервной копии файла данных {SelectedGame}...", true);
+
             string dataFolder = GetFolder(DataPath);
             string dataName = Path.GetFileName(DataPath);
-
-            msgDelegate($"Создание резервной копии файла данных {SelectedGame}...", true);
-            string backupFolder = dataFolder + "backup";
-            string backupPath = Path.Combine(backupFolder, dataName);
-            if (File.Exists(backupPath))
+            string backupRootFolder = dataFolder + "backup";
+            string backupFolder, backupPath;
+            if (Directory.Exists(backupRootFolder))
             {
-                bool rewrite = MainWindow.ScriptQuestion($"Резервная копия уже существует (путь - `{backupPath}`).\n" +
-                                                         "Заменить её?");
-                if (rewrite)
-                {
-                    try
-                    {
-                        File.Delete(backupPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        errorDelegate($"Не удалось удалить существующую резервную копию.\nОшибка - {ex}");
-                        return false;
-                    }
-                }
+                int? lastNum = Directory.EnumerateDirectories(backupRootFolder)
+                                        .Select(x => TryGetNumber(numberRegex.Match(x).Groups[1].Value))
+                                        .Where(x => x is not null)
+                                        .DefaultIfEmpty().Max();
+                if (lastNum is null)
+                    lastNum = 1;
                 else
-                    return false;
+                    lastNum++;
+
+                backupFolder = Path.Combine(backupRootFolder, lastNum.ToString());
             }
             else
             {
-                if (!Directory.Exists(backupFolder))
-                    Directory.CreateDirectory(backupFolder);
+                backupFolder = Path.Combine(backupRootFolder, "1");
             }
 
             try
             {
+                Directory.CreateDirectory(backupFolder);
+
+                backupPath = Path.Combine(backupFolder, dataName);
                 File.Copy(DataPath, backupPath);
             }
             catch (Exception ex)
