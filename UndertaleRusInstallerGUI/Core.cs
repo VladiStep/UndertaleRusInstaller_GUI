@@ -76,7 +76,9 @@ public static class Core
     private const string demonxNonWin = "demonx = \"Part of this game's charm is the mystery of how many options or secrets there are. If you are reading this, " +
                                         "please don't post this message or this information anywhere. Or doing secrets will become pointless.\"";
 
-    private static readonly string escapedDirSepChar = $"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}";
+    private static readonly string escapedDirSepChar = (Path.DirectorySeparatorChar == '\\')
+                                                       ? $"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}"
+                                                       : Path.DirectorySeparatorChar.ToString();
     private static readonly Regex numberRegex = new(escapedDirSepChar + "(\\d+)$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static GameType _selectedGame;
@@ -93,6 +95,7 @@ public static class Core
     public static string DataPath { get; set; }
     public static bool ReplaceXBOXTALEExe { get; set; }
     public static string XBOXTALEExePath => gameDirLocation + xboxtaleExePath.Path;
+    public static string BackupFolder { get; set; }
 
     public static string ZipPath { get; set; }
     public static bool ZipIsValid { get; set; } = true; 
@@ -112,6 +115,14 @@ public static class Core
         {
             yield return list[i];
         }
+    }
+
+    public static int? TryGetNumber(string str)
+    {
+        if (Int32.TryParse(str, out int res))
+            return res;
+
+        return null;
     }
 
     // Thanks, ChatGPT-4o.
@@ -459,22 +470,13 @@ public static class Core
 
     public static async Task<bool> MakeDataBackup(MsgDelegate msgDelegate, Action<string> errorDelegate)
     {
-        static int? TryGetNumber(string str)
-        {
-            if (Int32.TryParse(str, out int res))
-                return res;
-
-            return null;
-        }
-
         bool res = await Task.Run(() =>
         {
             msgDelegate($"Создание резервной копии файла данных {SelectedGame}...", true);
 
-            string dataFolder = GetFolder(DataPath);
             string dataName = Path.GetFileName(DataPath);
-            string backupRootFolder = dataFolder + "backup";
-            string backupFolder, backupPath;
+            string backupRootFolder = gameDirLocation + "backup";
+            string backupPath;
             if (Directory.Exists(backupRootFolder))
             {
                 int? lastNum = Directory.EnumerateDirectories(backupRootFolder)
@@ -486,18 +488,18 @@ public static class Core
                 else
                     lastNum++;
 
-                backupFolder = Path.Combine(backupRootFolder, lastNum.ToString());
+                BackupFolder = Path.Combine(backupRootFolder, lastNum.ToString());
             }
             else
             {
-                backupFolder = Path.Combine(backupRootFolder, "1");
+                BackupFolder = Path.Combine(backupRootFolder, "1");
             }
 
             try
             {
-                Directory.CreateDirectory(backupFolder);
+                Directory.CreateDirectory(BackupFolder);
 
-                backupPath = Path.Combine(backupFolder, dataName);
+                backupPath = Path.Combine(BackupFolder, dataName);
                 File.Copy(DataPath, backupPath);
             }
             catch (Exception ex)
@@ -1030,33 +1032,7 @@ public static class Core
         }
 
         string exeName = Path.GetFileName(exePath);
-        string backupFolder = GetFolder(exePath) + "backup";
-        string backupPath = Path.Combine(backupFolder, exeName);
-        if (File.Exists(backupPath))
-        {
-            bool rewrite = MainWindow.ScriptQuestion($"Резервная копия уже существует (путь - \"{backupPath}\").\n" +
-                                                     "Заменить её?");
-            if (rewrite)
-            {
-                try
-                {
-                    File.Delete(backupPath);
-                }
-                catch (Exception ex)
-                {
-                    errorDelegate($"Не удалось удалить существующую резервную копию.\nОшибка - {ex.Message}");
-                    return BackupResult.Error;
-                }
-            }
-            else
-                return BackupResult.Error;
-        }
-        else
-        {
-            if (!Directory.Exists(backupFolder))
-                Directory.CreateDirectory(backupFolder);
-        }
-
+        string backupPath = Path.Combine(BackupFolder, exeName);
         try
         {
             File.Copy(exePath, backupPath);
