@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
+             x:Class="UndertaleRusInstallerGUI.Views.GDIErrorView"
+			 Background="{StaticResource WinLightGrayBrush}"
+			 AttachedToVisualTree="UserControl_AttachedToVisualTree">
+	<UserControl.Styles>
+		<StyleInclude Source="/Styles/AppStyles.axaml"/>
+	</UserControl.Styles>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+
+		<DockPanel Grid.Row="0" Grid.ColumnSpan="2" Background="White">
+			<Image Width="150" Height="60" Source="/Assets/confirm_install.png"/>
+			<StackPanel Margin="9,7,0,0">
+				<TextBlock Classes="littleHeader">Ошибка</TextBlock>
+				<TextBlock Classes="normal littleSubHeader">Отсутствует необходимая библиотека.</TextBlock>
+			</StackPanel>
+		</DockPanel>
+		<Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
+
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
+			<TextBlock Classes="normal" Margin="0,0,0,5">
+				Для работы с текстурами требуется библиотека <Bold>"libgdiplus"</Bold>.<LineBreak/>
+				<LineBreak/>
+				В комплекте с установщиком уже идут необходимые файлы, но, судя по всему, их оказалось недостаточно.<LineBreak/>
+				<LineBreak/>
+				Установите её открыв терминал и введя следующее:
+			</TextBlock>
+			<SelectableTextBlock Classes="normal log" Name="GDIInstallCmdText">
+				command
+			</SelectableTextBlock>
+			<TextBlock Classes="normal" Margin="0,5,0,0">
+				После этого, перезапустите установщик.<LineBreak/>
+				<LineBreak/>
+				Текст команды уже должен быть у вас в буфере обмена.<LineBreak/>
+				Если нет, тогда скопируйте из поля сверху.
+			</TextBlock>
+		</StackPanel>
+	</Grid>
+</UserControl>

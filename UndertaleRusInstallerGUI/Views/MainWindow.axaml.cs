@@ -13,6 +13,13 @@ namespace UndertaleRusInstallerGUI.Views;
 
 public partial class MainWindow : Window
 {
+    public UserControl[] Parts { get; set; }
+    private short currPartIndex = 0;
+    private readonly short lastPartIndex = -1;
+    private readonly Thickness copyrightMargin = new(0, 0, 5, 0);
+    private ushort? tempGoBackAmount = null;
+    private ushort? tempGoNextAmount = null;
+
     public MainWindow()
     {
         Parts = new UserControl[]
@@ -31,13 +38,10 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         Core.MainWindow = this;
+
+        CheckForGDIError(ref lastPartIndex);
     }
-    public UserControl[] Parts { get; set; }
-    private short currPartIndex = 0;
-    private readonly short lastPartIndex = -1;
-    private readonly Thickness copyrightMargin = new(0, 0, 5, 0);
-    private ushort? tempGoBackAmount = null;
-    private ushort? tempGoNextAmount = null;
+    
 
     public void ChangeBackButtonState(bool state, ushort amount = 1)
     {
@@ -103,6 +107,15 @@ public partial class MainWindow : Window
     {
         GoForward();
     }
+    private void NextButton_Click_GDIError(object sender, RoutedEventArgs e)
+    {
+        currPartIndex = lastPartIndex;
+        RefreshCurrentPart();
+
+        NextButton.Click -= NextButton_Click_GDIError;
+        NextButton.Click += NextButton_Click;
+    }
+
     private void RefreshCurrentPart()
     {
         CurrentPartControl.Content = Parts[currPartIndex];
@@ -114,11 +127,31 @@ public partial class MainWindow : Window
         if (currPartIndex == lastPartIndex)
         {
             BackButton.IsVisible = false;
+            CancelButton.IsEnabled = false;
             NextButton.Classes.Add("finish");
             return;
         }
 
         BackButton.IsVisible = currPartIndex != 0;
+    }
+
+    private void CheckForGDIError(ref short lastPartIndex)
+    {
+        try
+        {
+            var bmp = new System.Drawing.Bitmap(1, 1);
+        }
+        catch (Exception ex)
+        {
+            if (ex.ToString().Contains("libgdiplus"))
+            {
+                Parts = Parts.Append(new GDIErrorView(this)).ToArray();
+                lastPartIndex++;
+
+            NextButton.Click -= NextButton_Click;
+            NextButton.Click += NextButton_Click_GDIError;
+            }
+        }
     }
 
     private bool OnCancel()

@@ -27,6 +27,7 @@ public partial class StartView : UserControl
         InitializeComponent();
 
         this.mainWindow = mainWindow;
+
         try
         {
             floweyFrames = new[]

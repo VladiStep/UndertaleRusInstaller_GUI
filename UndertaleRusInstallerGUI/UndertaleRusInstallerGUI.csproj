@@ -66,5 +66,8 @@
     <Compile Update="Views\ChooseArchivePathView.axaml.cs">
       <DependentUpon>ChooseArchivePathView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\GDIErrorView.axaml.cs">
+      <DependentUpon>GDIErrorView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

@@ -115,6 +115,11 @@
 		</Style>
 		<!-- No need for "^:disabled" because it won't be disabled -->
 	</Style>
+
+	<Style Selector="SelectableTextBlock#GDIInstallCmdText">
+		<Setter Property="Padding" Value="5"/>
+		<Setter Property="Background" Value="Black"/>
+	</Style>
 	
 	
 	<Style Selector="RadioButton">
