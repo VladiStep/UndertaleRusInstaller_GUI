@@ -26,7 +26,7 @@ public partial class GDIErrorView : UserControl
             return;
 
         string cmdText; 
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             cmdText = "sudo apt-get update\n" +
                       "sudo apt-get install libc6-dev libgdiplus";
