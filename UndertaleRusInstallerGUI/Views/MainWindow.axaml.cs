@@ -148,8 +148,8 @@ public partial class MainWindow : Window
                 Parts = Parts.Append(new GDIErrorView(this)).ToArray();
                 lastPartIndex++;
 
-            NextButton.Click -= NextButton_Click;
-            NextButton.Click += NextButton_Click_GDIError;
+                NextButton.Click -= NextButton_Click;
+                NextButton.Click += NextButton_Click_GDIError;
             }
         }
     }
