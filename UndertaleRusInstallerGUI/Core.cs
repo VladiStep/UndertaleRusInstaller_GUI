@@ -220,6 +220,10 @@ public static class Core
                     gameDirLocation = windowsDir.Groups[1].Value;
             }
         }
+
+        if (String.IsNullOrEmpty(gameDirLocation))
+            gameDirLocation = GetFolder(dataPath);
+
         if (!Directory.Exists(gameDirLocation))
             gameDirLocation = null;
 
