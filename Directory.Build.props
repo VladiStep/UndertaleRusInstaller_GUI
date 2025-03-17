@@ -4,8 +4,8 @@
     <AvaloniaVersion>11.1.4</AvaloniaVersion>
 	
 	<CompanyName>VladStepu2001</CompanyName>
-	<Copyright>Copyright © 2024</Copyright>
-	<Version>1.2.0</Version>
+	<Copyright>Copyright © 2025</Copyright>
+	<Version>1.2.1</Version>
 	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	<Product>Установщик русификатора Undertale/XBOXTALE</Product>
 	<AssemblyTitle>UndertaleRusInstallerGUI</AssemblyTitle>
