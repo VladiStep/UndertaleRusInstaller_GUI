@@ -1,2 +1,0 @@
-REM zip_exec linux_x64.zip UndertaleRusInstaller
-zip_exec UndertaleRusInstaller_Linux.zip UndertaleRusInstaller
