@@ -13,9 +13,12 @@ namespace UndertaleRusInstallerGUI.Views
 {
     public partial class ChooseDataFileView : UserControl
     {
+        private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
         private readonly MainWindow mainWindow;
         private GameType lastSelectedGame;
         private bool cleanResultText = true;
+        private bool ignoreTextChange = false;
 
         public ChooseDataFileView() // For the designer preview
         {
@@ -67,7 +70,7 @@ namespace UndertaleRusInstallerGUI.Views
         }
         private void UserControl_DetachedFromVisualTree(object sender, VisualTreeAttachmentEventArgs e)
         {
-            DataPath = DataPathBox.Text;
+            DataPath = ProcessDataPath(DataPathBox.Text);
             ZipIsValid = true;
         }
 
@@ -101,10 +104,23 @@ namespace UndertaleRusInstallerGUI.Views
         }
         private void DataPathBox_TextChanging(object sender, TextChangingEventArgs e)
         {
-            if (mainWindow is null)
+            if (mainWindow is null || ignoreTextChange)
                 return;
 
-            bool nextButtonState = IsDataPathValid(DataPathBox.Text);
+            string dataPath = DataPathBox.Text;
+            bool nextButtonState = IsDataPathValid(dataPath);
+            if (!nextButtonState && isMacOS) // e.g. "../UNDERTALE.app/"
+            {
+                dataPath = ProcessDataPath(dataPath);
+
+                nextButtonState = IsDataPathValid(dataPath);
+                if (nextButtonState)
+                {
+                    ignoreTextChange = true;
+                    DataPathBox.Text = dataPath;
+                    ignoreTextChange = false;
+                }
+            }
             mainWindow.ChangeNextButtonState(nextButtonState);
 
             if (cleanResultText)

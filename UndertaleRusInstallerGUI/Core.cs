@@ -66,7 +66,7 @@ public static class Core
     public static readonly string TempDirPath = Path.Combine(Path.GetTempPath(), "UndertaleRusInstaller") + Path.DirectorySeparatorChar;
     public static readonly string NewDataDirPath = Path.Combine(TempDirPath, "data") + Path.DirectorySeparatorChar;
     public const string ZipName = "ru_data.zip";
-    private static string gameDirLocation, gamePrefix;
+    private static string gameRootDirLocation, gamePrefix; // "gameRootDirLocation" = a location of the root game folder (not always the folder with "data.win")
     public static readonly string[] ValidDataExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
                                                             ? new[] { ".app", ".win", ".ios", ".unx" }
                                                             : new[] { ".win", ".ios", ".unx" };
@@ -94,7 +94,7 @@ public static class Core
     public static UndertaleData Data { get; set; }
     public static string DataPath { get; set; }
     public static bool ReplaceXBOXTALEExe { get; set; }
-    public static string XBOXTALEExePath => gameDirLocation + xboxtaleExePath.Path;
+    public static string XBOXTALEExePath => gameRootDirLocation + xboxtaleExePath.Path;
     public static string BackupFolder { get; set; }
 
     public static string ZipPath { get; set; }
@@ -196,12 +196,16 @@ public static class Core
         if (dataPath is null)
             return null;
 
+        return ProcessDataPath(dataPath);
+    }
+    public static string ProcessDataPath(string dataPath)
+    {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             if (dataPath.EndsWith(".app/", StringComparison.InvariantCulture)) // Файл приложения MacOS 
             {
                 if (SelectedGame == GameType.XBOXTALE)
-                    gameDirLocation = dataPath;
+                    gameRootDirLocation = dataPath;
                 dataPath += utMacFileLoc;
             }
         }
@@ -211,18 +215,18 @@ public static class Core
             {
                 Match linuxDir = utLinuxLocRegex.Match(dataPath);
                 if (linuxDir.Success)
-                    gameDirLocation = linuxDir.Groups[1].Value;
+                    gameRootDirLocation = linuxDir.Groups[1].Value;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Match windowsDir = utWinLocRegex.Match(dataPath);
                 if (windowsDir.Success)
-                    gameDirLocation = windowsDir.Groups[1].Value;
+                    gameRootDirLocation = windowsDir.Groups[1].Value;
             }
         }
 
-        if (!Directory.Exists(gameDirLocation))
-            gameDirLocation = null;
+        if (!Directory.Exists(gameRootDirLocation))
+            gameRootDirLocation = null;
 
         return dataPath;
     }
@@ -236,7 +240,7 @@ public static class Core
                 string path = dirPath + utWinFileLoc;
                 if (File.Exists(path))
                 {
-                    gameDirLocation = dirPath;
+                    gameRootDirLocation = dirPath;
                     return path;
                 }
 
@@ -244,7 +248,7 @@ public static class Core
                 path = dirPath + utWinFileLoc;
                 if (File.Exists(path))
                 {
-                    gameDirLocation = dirPath;
+                    gameRootDirLocation = dirPath;
                     return path;
                 }
             }
@@ -256,7 +260,7 @@ public static class Core
             string path = dirPath + utMacFileLoc;
             if (File.Exists(path))
             {
-                gameDirLocation = dirPath;
+                gameRootDirLocation = dirPath;
                 return path;
             }
         }
@@ -269,7 +273,7 @@ public static class Core
                 string path = dirPath + utLinuxFileLoc;
                 if (File.Exists(path))
                 {
-                    gameDirLocation = dirPath;
+                    gameRootDirLocation = dirPath;
                     return path;
                 }
             }
@@ -1019,13 +1023,13 @@ public static class Core
     {
         msgDelegate("Создание резервной копии исполняемого файла игры...", true);
 
-        if (gameDirLocation is null)
+        if (gameRootDirLocation is null)
         {
             warnDelegate("Внимание - не удалось найти путь папки с игрой.");
             return BackupResult.Error;
         }
 
-        string exePath = gameDirLocation + xboxtaleExePath.Path;
+        string exePath = gameRootDirLocation + xboxtaleExePath.Path;
         if (!File.Exists(exePath))
         {
             warnDelegate("Внимание - не найден исполняемый файл игры.");
@@ -1056,7 +1060,7 @@ public static class Core
         else
             return true;
 
-        string exePath = gameDirLocation + xboxtaleExePath.Path;
+        string exePath = gameRootDirLocation + xboxtaleExePath.Path;
         string srcExePath = Path.Combine(NewDataDirPath, xboxtaleExePath.Name);
         if (!File.Exists(srcExePath))
         {
