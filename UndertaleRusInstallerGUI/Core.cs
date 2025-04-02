@@ -221,9 +221,6 @@ public static class Core
             }
         }
 
-        if (String.IsNullOrEmpty(gameDirLocation))
-            gameDirLocation = GetFolder(dataPath);
-
         if (!Directory.Exists(gameDirLocation))
             gameDirLocation = null;
 
@@ -479,7 +476,7 @@ public static class Core
             msgDelegate($"Создание резервной копии файла данных {SelectedGame}...", true);
 
             string dataName = Path.GetFileName(DataPath);
-            string backupRootFolder = gameDirLocation + "backup";
+            string backupRootFolder = GetFolder(DataPath) + "backup";
             string backupPath;
             if (Directory.Exists(backupRootFolder))
             {
