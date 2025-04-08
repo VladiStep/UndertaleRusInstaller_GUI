@@ -200,6 +200,9 @@ public static class Core
     }
     public static string ProcessDataPath(string dataPath)
     {
+        if (String.IsNullOrEmpty(dataPath))
+            return dataPath;
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             if (dataPath.EndsWith(".app/", StringComparison.InvariantCulture)) // Файл приложения MacOS 
