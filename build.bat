@@ -12,7 +12,7 @@ cd ..
 cd "osx_x64\UndertaleRusInstaller.app\Contents\MacOS"
 del UndertaleRusInstaller
 rename UndertaleRusInstallerGUI.Desktop UndertaleRusInstaller
-cd ..
+cd ..\..\..\..
 
 cd linux_x64
 del UndertaleRusInstaller
