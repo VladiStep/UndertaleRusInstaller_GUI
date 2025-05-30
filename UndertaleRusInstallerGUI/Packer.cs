@@ -134,9 +134,40 @@ public class Packer
         tw.Close();
     }
 
+    /// <summary>
+    /// Reads PNG image size by only reading necessary bytes in the header
+    /// </summary>
+    public static (int Width, int Height) ReadPNGSize(string filePath)
+    {
+        static uint ReadUInt32BigEndian(BinaryReader br)
+        {
+            return (uint)br.ReadByte() << 24 | (uint)br.ReadByte() << 16 | (uint)br.ReadByte() << 8 | (uint)br.ReadByte();
+        }
+
+        using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using BinaryReader br = new(fs);
+
+        // Check PNG signature (first 8 bytes)
+        ulong signature = br.ReadUInt64();
+        if (signature != 0x0A1A0A0D474E5089) // [ 137, 80, 78, 71, 13, 10, 26, 10 ]
+            throw new InvalidDataException("Not a valid PNG file.");
+
+        // Next chunk should be IHDR
+        uint length = ReadUInt32BigEndian(br);
+        uint chunkType = br.ReadUInt32();
+        if (chunkType != 0x52444849) // 0x52444849 -> "IHDR"
+            throw new InvalidDataException("IHDR chunk not found where expected.");
+
+        // Read width and height from IHDR chunk
+        int width = (int)ReadUInt32BigEndian(br);
+        int height = (int)ReadUInt32BigEndian(br);
+
+        return (width, height);
+    }
+
     private void ScanForTextures(string _path, string _wildcard, Action _incrValDeleg, Action<double> _setMaxDeleg)
     {
-        DirectoryInfo di = new DirectoryInfo(_path);
+        DirectoryInfo di = new(_path);
         FileInfo[] files = di.GetFiles(_wildcard, SearchOption.AllDirectories);
 
         _setMaxDeleg(files.Length);
@@ -147,25 +178,23 @@ public class Packer
             {
                 _incrValDeleg();
 
-                Image img = Image.FromFile(fi.FullName);
-                if (img != null)
+                (int width, int height) = ReadPNGSize(fi.FullName);
+                if (width <= AtlasSize && height <= AtlasSize)
                 {
-                    if (img.Width <= AtlasSize && img.Height <= AtlasSize)
+                    TextureInfo ti = new()
                     {
-                        TextureInfo ti = new TextureInfo();
+                        Source = fi.FullName,
+                        Width = width,
+                        Height = height
+                    };
 
-                        ti.Source = fi.FullName;
-                        ti.Width = img.Width;
-                        ti.Height = img.Height;
+                    SourceTextures.Add(ti);
 
-                        SourceTextures.Add(ti);
-
-                        Log.WriteLine("Added " + fi.FullName);
-                    }
-                    else
-                    {
-                        Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
-                    }
+                    Log.WriteLine("Added " + fi.FullName);
+                }
+                else
+                {
+                    Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
                 }
             }
             catch (Exception ex)
