@@ -134,7 +134,7 @@ public static class Core
             Directory.CreateDirectory(destDirPath);
 
         bool found = false;
-        foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName, StringComparison.InvariantCulture)))
+        foreach (var entry in zipArchive.Entries.Where(e => e.FullName.StartsWith(directoryName, StringComparison.Ordinal)))
         {
             if (entry.FullName == directoryName)
                 continue;
@@ -157,7 +157,7 @@ public static class Core
     public static FileStatus IsZipPathValid(string zipPath, bool checkName = true)
     {
         FileStatus res = FileStatus.OK;
-        if ((checkName && !zipPath.EndsWith(ZipName, StringComparison.InvariantCulture))
+        if ((checkName && !zipPath.EndsWith(ZipName, StringComparison.Ordinal))
             || !File.Exists(zipPath))
         {
             res = FileStatus.NotFound;
@@ -184,7 +184,7 @@ public static class Core
     {
         return dataPath?.Length >= 5 // "a.win"
                && File.Exists(dataPath)
-               && ValidDataExtensions.Any(x => dataPath.EndsWith(x, StringComparison.InvariantCulture));
+               && ValidDataExtensions.Any(x => dataPath.EndsWith(x, StringComparison.Ordinal));
     }
     public static string ChooseDataPath()
     {
@@ -203,7 +203,7 @@ public static class Core
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            if (dataPath.EndsWith(".app/", StringComparison.InvariantCulture)) // Файл приложения MacOS 
+            if (dataPath.EndsWith(".app/", StringComparison.Ordinal)) // Файл приложения MacOS 
             {
                 if (SelectedGame == GameType.XBOXTALE)
                     gameRootDirLocation = dataPath;
@@ -392,7 +392,7 @@ public static class Core
         int embedSkipAmount = (SelectedGame == GameType.Undertale) ? 20 : 35;
         int embedTakeAmount = Data.EmbeddedTextures.Count - embedSkipAmount;
         var embedTextures = Data.EmbeddedTextures.ReverseList().Take(embedTakeAmount);
-        var notJaFonts = Data.Fonts.Where(x => !x.Name.Content.StartsWith("fnt_ja", StringComparison.InvariantCulture))
+        var notJaFonts = Data.Fonts.Where(x => !x.Name.Content.StartsWith("fnt_ja", StringComparison.Ordinal))
                                    .ToHashSet();
         var pageItems = Data.TexturePageItems.ToHashSet();
         ImmutableDictionary<UndertaleTexturePageItem, int> pageItemsIndexDict = null;
@@ -438,7 +438,7 @@ public static class Core
                     continue;
                 }
 
-                if (sprite.Name.Content.EndsWith("_ru", StringComparison.InvariantCulture))
+                if (sprite.Name.Content.EndsWith("_ru", StringComparison.Ordinal))
                     matchingItemsCount++;
                 totalItemsCount++;
 
@@ -549,7 +549,7 @@ public static class Core
     
     private static string TranslateSavingMessage(string line)
     {
-        if (line.StartsWith("Writing chunk", StringComparison.InvariantCulture))
+        if (line.StartsWith("Writing chunk", StringComparison.Ordinal))
             return "Запись блока данных " + line[^4..];
         else if (line == "Writing object references...")
             return "Запись ссылок ресурсов...";

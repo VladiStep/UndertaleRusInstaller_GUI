@@ -78,9 +78,9 @@ namespace UndertaleRusInstallerGUI.Views
 
         private string TranslateLoadingMessage(string line)
         {
-            if (line.StartsWith("Counting objects", StringComparison.InvariantCulture))
+            if (line.StartsWith("Counting objects", StringComparison.Ordinal))
                 return "Подсчёт объектов блока данных " + line[^4..];
-            else if (line.StartsWith("Reading chunk", StringComparison.InvariantCulture))
+            else if (line.StartsWith("Reading chunk", StringComparison.Ordinal))
                 return "Чтение блока данных " + line[^4..];
             else if (line == "Resolving resource IDs...")
                 return "Преобразование идентификаторов ресурсов...";
