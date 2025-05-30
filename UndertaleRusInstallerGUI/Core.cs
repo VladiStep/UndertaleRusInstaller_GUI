@@ -76,9 +76,7 @@ public static class Core
     private const string demonxNonWin = "demonx = \"Part of this game's charm is the mystery of how many options or secrets there are. If you are reading this, " +
                                         "please don't post this message or this information anywhere. Or doing secrets will become pointless.\"";
 
-    private static readonly string escapedDirSepChar = (Path.DirectorySeparatorChar == '\\')
-                                                       ? $"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}"
-                                                       : Path.DirectorySeparatorChar.ToString();
+    private static readonly string escapedDirSepChar = Regex.Escape(Path.DirectorySeparatorChar.ToString()); // '\' required to be escaped in RegEx
     private static readonly Regex numberRegex = new(escapedDirSepChar + "(\\d+)$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static GameType _selectedGame;
