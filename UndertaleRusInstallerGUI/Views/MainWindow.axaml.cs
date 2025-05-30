@@ -139,7 +139,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var bmp = new System.Drawing.Bitmap(1, 1);
+            using var bmp = new System.Drawing.Bitmap(1, 1);
         }
         catch (Exception ex)
         {
