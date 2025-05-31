@@ -116,7 +116,7 @@
 		<!-- No need for "^:disabled" because it won't be disabled -->
 	</Style>
 
-	<Style Selector="SelectableTextBlock#GDIInstallCmdText">
+	<Style Selector="SelectableTextBlock.cmdText">
 		<Setter Property="Padding" Value="5"/>
 		<Setter Property="Background" Value="Black"/>
 	</Style>

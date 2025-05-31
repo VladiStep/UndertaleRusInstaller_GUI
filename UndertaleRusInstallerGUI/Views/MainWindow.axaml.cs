@@ -5,9 +5,7 @@ using System;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Avalonia;
-using Avalonia.Media;
 
 namespace UndertaleRusInstallerGUI.Views;
 
@@ -39,7 +37,7 @@ public partial class MainWindow : Window
 
         Core.MainWindow = this;
 
-        CheckForGDIError(ref lastPartIndex);
+        bool hasError = CheckForGDIError(ref lastPartIndex);
     }
     
 
@@ -135,22 +133,108 @@ public partial class MainWindow : Window
         BackButton.IsVisible = currPartIndex != 0;
     }
 
-    private void CheckForGDIError(ref short lastPartIndex)
+    /// <summary>
+    /// Checks if "libgdiplus" is available on the system.
+    /// </summary>
+    /// <param name="lastPartIndex"></param>
+    /// <returns><see langword="true" /> if there is an error (no "libgdiplus").</returns>
+    private bool CheckForGDIError(ref short lastPartIndex)
     {
+        void ActivateGDIErrorPart(ref short lastPartIndex, GDIErrorType errorType)
+        {
+            Parts = Parts.Append(new GDIErrorView(this, errorType)).ToArray();
+            lastPartIndex++;
+
+            NextButton.Click -= NextButton_Click;
+            NextButton.Click += NextButton_Click_GDIError;
+        }
+
         try
         {
-            using var bmp = new System.Drawing.Bitmap(1, 1);
+            // Only Linux at the time.
+            // TODO: Implement all of this for MacOS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                /// If "libfontconfig" is installed, then the bundled version can conflict with the current config file,
+                /// which leads to a lot of "fontconfig" warnings.
+                /// So we "discard" it by renaming it before the "libgdiplus" loads.
+                /// If it was already "discarded", then we shouldn't do anything.
+
+                string libfontconfigDiscarded = $"(discarded){OSMethods.libfontconfig}";
+                string destPath = Path.Combine(Core.CurrDirPath, libfontconfigDiscarded);
+                if (!File.Exists(destPath))
+                {
+                    string srcPath = Path.Combine(Core.CurrDirPath, OSMethods.libfontconfig);
+                    if (File.Exists(srcPath))
+                    {
+                        if (OSMethods.IsUNIXLibraryInstalled(OSMethods.libfontconfig) == true)
+                        {
+                            File.Move(srcPath, destPath);
+
+                            OSMethods.Replace_libfontconfig_name(libfontconfigDiscarded);
+                        }
+                    }
+                }
+            }
+
+            // An empty 10x10 PNG image (152 bytes)
+            byte[] samplePNGBytes = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv" +
+                                                             "8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAPSURBVChTYxgFgxIwMAAAAZoAAXcn7CgAAAAASUVORK5CYII=");
+            using MemoryStream ms = new(samplePNGBytes);
+            using System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+
+            return false;
         }
         catch (Exception ex)
         {
-            if (ex.ToString().Contains("libgdiplus"))
+            if (ex is ArgumentException or OutOfMemoryException) // The current "libgdiplus" version is broken
             {
-                Parts = Parts.Append(new GDIErrorView(this)).ToArray();
-                lastPartIndex++;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ScriptMessage($"Произошла непредвиденная ошибка при проверке наличия и доступности библиотеки \"System.Drawing\": {ex.Message}.\n" +
+                                  "Вы можете попытаться продолжить, но, скорее всего, будет ошибка.\n" +
+                                  "Сообщите об этой ошибке автору русификатора.");
 
-                NextButton.Click -= NextButton_Click;
-                NextButton.Click += NextButton_Click_GDIError;
+                    return false;
+                }
+
+                GDIErrorType reason;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    string libgdiplus = "libgdiplus.so";
+                    string libgdiplusPath = Path.Combine(Core.CurrDirPath, libgdiplus);
+                    reason = File.Exists(libgdiplus)
+                             ? GDIErrorType.BundledIsBroken
+                             : GDIErrorType.InstalledIsBroken;
+                }
+                else
+                {
+                    // MacOS
+                    reason = GDIErrorType.BundledIsBroken;
+                }
+                ActivateGDIErrorPart(ref lastPartIndex, reason);
+
+                return true;
             }
+
+            string excText = ex.ToString();
+            if (excText.Contains("libgdiplus")) // (A compatible version of) "libgdiplus" is missing
+            {
+                ActivateGDIErrorPart(ref lastPartIndex, GDIErrorType.CompatibleIsMissing);
+
+                return true;
+            }
+            else
+            {
+                string libgdiplus = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                    ? "System.Drawing"
+                                    : "libgdiplus";
+                ScriptMessage($"Произошла непредвиденная ошибка при проверке наличия и доступности библиотеки \"{libgdiplus}\":\n{ex.Message}\n\n" +
+                              "Вы можете попытаться продолжить, но, скорее всего, будет ошибка.\n" +
+                              "Сообщите об этой ошибке автору русификатора.");
+            }
+
+            return false;
         }
     }
 

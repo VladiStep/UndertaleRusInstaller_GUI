@@ -4,8 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="310"
              x:Class="UndertaleRusInstallerGUI.Views.GDIErrorView"
+             xmlns:local="clr-namespace:UndertaleRusInstallerGUI.Views"
              Background="{StaticResource WinLightGrayBrush}"
-             AttachedToVisualTree="UserControl_AttachedToVisualTree">
+             AttachedToVisualTree="UserControl_AttachedToVisualTree"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <UserControl.Styles>
         <StyleInclude Source="/Styles/AppStyles.axaml"/>
     </UserControl.Styles>
@@ -24,28 +26,69 @@
             <Image Width="150" Height="60" Source="/Assets/gdi_error.png"/>
             <StackPanel Margin="9,7,0,0">
                 <TextBlock Classes="littleHeader">Ошибка</TextBlock>
-                <TextBlock Classes="normal littleSubHeader">Отсутствует необходимая библиотека.</TextBlock>
+                <TextBlock Classes="normal littleSubHeader">Проблема с библиотекой для обработки изображений.</TextBlock>
             </StackPanel>
         </DockPanel>
         <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Fill="#FFABABAB" Height="1"/>
 
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
-            <TextBlock Classes="normal" Margin="0,0,0,5">
-                Для работы с текстурами требуется библиотека <Bold>"libgdiplus"</Bold>.<LineBreak/>
-                <LineBreak/>
-                В комплекте с установщиком уже идут необходимые файлы, но, судя по всему, их оказалось недостаточно.<LineBreak/>
-                <LineBreak/>
-                Установите её открыв терминал и введя следующее:
-            </TextBlock>
-            <SelectableTextBlock Classes="normal log" Name="GDIInstallCmdText">
-                command
-            </SelectableTextBlock>
-            <TextBlock Classes="normal" Margin="0,5,0,0">
-                После этого, перезапустите установщик.<LineBreak/>
-                <LineBreak/>
-                Текст команды уже должен быть у вас в буфере обмена.<LineBreak/>
-                Если нет, тогда скопируйте из поля сверху.
-            </TextBlock>
-        </StackPanel>
+        <ContentControl Name="MainContent" Grid.Row="2" Grid.ColumnSpan="2" Margin="22,16,22,0">
+            <ContentControl.Resources>
+                <DataTemplate x:Key="{x:Static local:GDIErrorType.CompatibleIsMissing}">
+                    <StackPanel>
+                        <TextBlock Classes="normal" Margin="0,0,0,5">
+                            Для работы с текстурами требуется библиотека <Bold>"libgdiplus"</Bold>.<LineBreak/>
+                            <LineBreak/>
+                            В комплекте с установщиком уже идут необходимые файлы, но, судя по всему, они не совместимы с текущей версией ОС.<LineBreak/>
+                            <LineBreak/>
+                            Установите совместимую версию открыв терминал и введя следующее:
+                        </TextBlock>
+                        <SelectableTextBlock Classes="normal log cmdText" Text="{Binding InstallCmdText, Mode=OneTime}">
+                            command
+                        </SelectableTextBlock>
+                        <TextBlock Classes="normal" Margin="0,5,0,0">
+                            После этого, перезапустите установщик.<LineBreak/>
+                            <LineBreak/>
+                            Текст команды уже должен быть у вас в буфере обмена.<LineBreak/>
+                            Если нет, тогда скопируйте из поля сверху.
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static local:GDIErrorType.BundledIsBroken}">
+                    <TextBlock Classes="normal" Margin="0,0,0,5">
+                        Для работы с текстурами требуется библиотека <Bold>"libgdiplus"</Bold>.<LineBreak/>
+                        <LineBreak/>
+                        В комплекте с установщиком уже идут необходимые файлы, но, судя по всему, они не совместимы с текущей версией ОС -
+                        при попытке загрузки пустого изображения возникает ошибка.<LineBreak/>
+                        <LineBreak/>
+                        Эти файлы уже должны были переместиться в папку <Bold>"discarded_libgdiplus_files"</Bold>.<LineBreak/>
+                        <LineBreak/>
+                        Перезапустите установщик - если проблема исчезнет, то вы сможете продолжить установку.
+                    </TextBlock>
+                </DataTemplate>
+
+                <DataTemplate x:Key="{x:Static local:GDIErrorType.InstalledIsBroken}">
+                    <StackPanel>
+                        <TextBlock Classes="normal" Margin="0,0,0,5">
+                            Для работы с текстурами требуется библиотека <Bold>"libgdiplus"</Bold>.<LineBreak/>
+                            <LineBreak/>
+                            Её файлы не были обнаружены в папке с установщиком - либо они уже были перемещены в папку <Bold>"discarded_libgdiplus_files"</Bold>
+                            вследствие несовместимости, либо они отсутствуют вовсе (например, вы не все извлекли их из архива).<LineBreak/>
+                            <LineBreak/>
+                            Установите совместимую версию открыв терминал и введя следующее:
+                        </TextBlock>
+                        <SelectableTextBlock Classes="normal log cmdText" Text="{Binding InstallCmdText, Mode=OneTime}">
+                            command
+                        </SelectableTextBlock>
+                        <TextBlock Classes="normal" Margin="0,5,0,0">
+                            После этого, перезапустите установщик.<LineBreak/>
+                            <LineBreak/>
+                            Текст команды уже должен быть у вас в буфере обмена.<LineBreak/>
+                            Если нет, тогда скопируйте из поля сверху.
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
     </Grid>
 </UserControl>
