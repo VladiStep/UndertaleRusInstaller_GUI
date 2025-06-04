@@ -1,11 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
-using System.IO;
 using System;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
+using System.IO;
 using System.Linq;
-using Avalonia;
+using System.Runtime.InteropServices;
 
 namespace UndertaleRusInstallerGUI.Views;
 
@@ -216,6 +215,11 @@ public partial class MainWindow : Window
 
                 return true;
             }
+
+            // Some obscure error related to single file publishing or trimming for Windows
+            // (the installer still works correctly)
+            if (ex is TypeLoadException && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return false;
 
             string excText = ex.ToString();
             if (excText.Contains("libgdiplus")) // (A compatible version of) "libgdiplus" is missing
