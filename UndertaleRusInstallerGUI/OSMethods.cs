@@ -143,7 +143,7 @@ namespace UndertaleRusInstallerGUI
                     return null;
                 }
 
-                return ldconfigOutput.Contains(libraryName, StringComparison.InvariantCultureIgnoreCase);
+                return ldconfigOutput.Contains(libraryName, StringComparison.OrdinalIgnoreCase);
             }
             catch (Exception ex)
             {
