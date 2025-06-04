@@ -1,0 +1,3 @@
+tinyfiledialogs.dll = tinyfiledialogs32.dll
+tinyfiledialogs.so = tinyfiledialogsLinux64.so
+tinyfiledialogs.dylib = tinyfiledialogs(Intel).dylib [though, it seems it also works for Silicon?]
