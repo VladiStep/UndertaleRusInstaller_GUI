@@ -21,6 +21,7 @@ using FuncClassif = UndertaleModLib.Models.UndertaleGeneralInfo.FunctionClassifi
 using OptionsFlags = UndertaleModLib.Models.UndertaleOptions.OptionsFlags;
 using System.Collections.Immutable;
 
+[assembly: Guid("B473613D-06DD-4C0D-AA8C-87154BBAFD9A")]
 namespace UndertaleRusInstallerGUI;
 
 public static class Core

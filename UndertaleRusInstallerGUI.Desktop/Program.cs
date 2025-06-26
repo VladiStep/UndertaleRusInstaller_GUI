@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Avalonia;
-using Tmds.DBus.Protocol;
 using static UndertaleRusInstallerGUI.OSMethods;
 
+[assembly: Guid("B473613D-06DD-4C0D-AA8C-87154BBAFD9B")]
 namespace UndertaleRusInstallerGUI.Desktop;
 
 class Program
