@@ -976,8 +976,37 @@ public static class Core
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            static void SetNonWindowsFlags()
+            {
+                // TODO: find out what flags are not necessary, and
+                // should it replace them only for MacOS full screen support?
+                
+                Data.GeneralInfo.Info = InfoFlags.SyncVertex1 | InfoFlags.Scale | InfoFlags.ShowCursor | InfoFlags.ScreenKey
+                                        | InfoFlags.SyncVertex3 | InfoFlags.StudioVersionB3;
+
+                Data.GeneralInfo.FunctionClassifications = FuncClassif.Joystick | FuncClassif.Gamepad | FuncClassif.Screengrab
+                                                           | FuncClassif.Math | FuncClassif.Action | FuncClassif.MatrixD3D
+                                                           | FuncClassif.DataStructures | FuncClassif.File | FuncClassif.INI
+                                                           | FuncClassif.Directory | FuncClassif.Encoding | FuncClassif.UIDialog
+                                                           | FuncClassif.MotionPlanning | FuncClassif.ShapeCollision | FuncClassif.Instance
+                                                           | FuncClassif.Room | FuncClassif.Game | FuncClassif.Window | FuncClassif.DrawColor
+                                                           | FuncClassif.Texture | FuncClassif.String | FuncClassif.Tiles
+                                                           | FuncClassif.Surface | FuncClassif.IO | FuncClassif.Variables
+                                                           | FuncClassif.Array | FuncClassif.Date | FuncClassif.Sprite | FuncClassif.Audio
+                                                           | FuncClassif.Event | FuncClassif.FreeType | FuncClassif.OS | FuncClassif.Console
+                                                           | FuncClassif.Buffer | FuncClassif.Steam;
+
+                Data.Options.Info = OptionsFlags.UseNewAudio | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey
+                                    | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress
+                                    | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
+                
+            }
+
             if (!ReplaceXBOXTALEExe)
+            {
+                SetNonWindowsFlags();
                 return true;
+            }
 
             BackupResult backupRes = MakeExecutableBackup(msgDelegate, errorDelegate, warnDelegate);
             if (backupRes == BackupResult.Error)
@@ -993,31 +1022,10 @@ public static class Core
                 if (!proceed)
                     return false;
             }
+
+            SetNonWindowsFlags();
         }
-
-        // TODO: find out what flags are not necessary, and
-        // should it replace them only for MacOS full screen support?
-        #region Flags
-        Data.GeneralInfo.Info = InfoFlags.SyncVertex1 | InfoFlags.Scale | InfoFlags.ShowCursor | InfoFlags.ScreenKey
-                                | InfoFlags.SyncVertex3 | InfoFlags.StudioVersionB3;
-
-        Data.GeneralInfo.FunctionClassifications = FuncClassif.Joystick | FuncClassif.Gamepad | FuncClassif.Screengrab
-                                                   | FuncClassif.Math | FuncClassif.Action | FuncClassif.MatrixD3D
-                                                   | FuncClassif.DataStructures | FuncClassif.File | FuncClassif.INI
-                                                   | FuncClassif.Directory | FuncClassif.Encoding | FuncClassif.UIDialog
-                                                   | FuncClassif.MotionPlanning | FuncClassif.ShapeCollision | FuncClassif.Instance 
-                                                   | FuncClassif.Room | FuncClassif.Game | FuncClassif.Window | FuncClassif.DrawColor 
-                                                   | FuncClassif.Texture | FuncClassif.String | FuncClassif.Tiles
-                                                   | FuncClassif.Surface | FuncClassif.IO | FuncClassif.Variables 
-                                                   | FuncClassif.Array | FuncClassif.Date | FuncClassif.Sprite | FuncClassif.Audio 
-                                                   | FuncClassif.Event | FuncClassif.FreeType | FuncClassif.OS | FuncClassif.Console
-                                                   | FuncClassif.Buffer | FuncClassif.Steam;
-
-        Data.Options.Info = OptionsFlags.UseNewAudio | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey
-                            | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress
-                            | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
-        #endregion
-
+        
         return true;
     }
     private static BackupResult MakeExecutableBackup(MsgDelegate msgDelegate, Action<string> errorDelegate, Action<string> warnDelegate)
