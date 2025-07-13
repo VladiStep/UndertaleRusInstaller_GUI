@@ -1,4 +1,4 @@
-# Установщик [русификатора LazyDesman](https://steamcommunity.com/sharedfiles/filedetails/?id=3102550843) для Undertale/NXTale.
+# Установщик [русификатора](https://steamcommunity.com/sharedfiles/filedetails/?id=3102550843) для Undertale/NXTale.
 
 Для Windows, Linux и MacOS.<br>
 https://drive.google.com/drive/folders/1dtY9pHCUMpr46wrgo0A1D5Tsaz7OprDq?usp=drive_link
